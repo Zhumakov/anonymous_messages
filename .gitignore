@@ -5,9 +5,10 @@ venv/
 
 # Python cache files
 __pycache__/
+.pytest_cache/
 
 # .env files
 *.env
 
 # Database files
-.sqlite3
+*.db

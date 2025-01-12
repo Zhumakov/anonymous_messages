@@ -1,0 +1,13 @@
+# Virtual environment and git repository files
+venv/
+.git
+.vimspector.json
+
+# Python cache files
+__pycache__/
+
+# .env files
+*.env
+
+# Database files
+.sqlite3

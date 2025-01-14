@@ -15,7 +15,7 @@ async def test_autoriztion(
     email, password, status_code, async_client: AsyncClient
 ):
     response: Response = await async_client.post(
-        "/registration", data={"email": email, "password": password}
+        "/auth", data={"email": email, "password": password}
     )
 
     assert response.status_code == status_code

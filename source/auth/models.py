@@ -1,6 +1,8 @@
 from pydantic import ConfigDict
-from source.database import Base
 from sqlalchemy import Column, Integer, String
+
+
+from source.database_service.database_config import Base 
 
 
 class User(Base):

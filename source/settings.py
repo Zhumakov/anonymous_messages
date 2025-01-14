@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     TEST_DB_PASS: str
     TEST_DB_NAME: str
 
+    SECRET_KEY: str
+    ALGORITHM: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
 

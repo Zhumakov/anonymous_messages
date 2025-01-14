@@ -2,10 +2,10 @@ from pydantic import ConfigDict
 from sqlalchemy import Column, Integer, String
 
 
-from source.database_service.database_config import Base 
+from source.database_service.database_config import Base
 
 
-class User(Base):
+class Users(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)

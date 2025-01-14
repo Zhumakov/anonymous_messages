@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
     create_async_engine,
-
 )
 from sqlalchemy.orm import DeclarativeBase
 
@@ -22,24 +21,17 @@ if settings.MODE == "TEST":
 
 else:
     DATABASE_URL = (
-            f"postgresql+asyncpg://"
-            f"{settings.DB_USER}:{settings.DB_PASS}"
-            f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
-            )
+        f"postgresql+asyncpg://"
+        f"{settings.DB_USER}:{settings.DB_PASS}"
+        f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+    )
     DATABASE_PARAMS = {}
 
 os.environ["SQLALCHEMY_URL"] = DATABASE_URL
 
 async_engine = create_async_engine(url=DATABASE_URL, **DATABASE_PARAMS, future=True)
-async_session = async_sessionmaker(
-    bind=async_engine, expire_on_commit=False, class_=AsyncSession
-)
+session_maker = async_sessionmaker(bind=async_engine, expire_on_commit=False, class_=AsyncSession)
 
 
 class Base(DeclarativeBase):
     pass
-
-
-async def get_session():
-    async with async_session() as session:
-        yield session

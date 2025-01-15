@@ -1,8 +1,8 @@
 """Create Users table
 
-Revision ID: f341985c38df
+Revision ID: c6b17954e110
 Revises: 
-Create Date: 2025-01-14 18:38:40.608980
+Create Date: 2025-01-15 18:56:25.329554
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ from source.database_service.database_config import Base
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f341985c38df'
+revision: str = 'c6b17954e110'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
-    sa.Column('hashed_password', sa.String(), nullable=False),
+    sa.Column('password', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

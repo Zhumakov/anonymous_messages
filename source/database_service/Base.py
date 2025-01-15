@@ -1,19 +1,25 @@
-from dataclasses import astuple
-from typing import Annotated
+from typing import Generic, Type, TypeVar
 
+from pydantic import BaseModel
 from sqlalchemy import Delete, Insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from source.database_service.database_config import session_maker
+
+from source.database_service.database_config import Base, session_maker
 
 
-class BaseService:
+ModelType = TypeVar("ModelType", bound=Base)
+PydanticSchemeType = TypeVar("PydanticSchemeType", bound=BaseModel)
+
+
+class BaseService(Generic[ModelType, PydanticSchemeType]):
     """Class for shared database functions"""
 
-    model = None
+    model: Type[ModelType]
+    pydantic_scheme: Type[PydanticSchemeType]
 
     @classmethod
-    async def get_by_id(cls, model_id: int):
+    async def get_by_id(cls, model_id: int) -> ModelType | None:
         async with session_maker() as session:
             session: AsyncSession
             query = select(cls.model).filter_by(id=model_id)
@@ -21,7 +27,7 @@ class BaseService:
             return result.scalar_one_or_none()
 
     @classmethod
-    async def get_one_or_none(cls, filter_data: dict):
+    async def get_one_or_none(cls, filter_data: dict) -> ModelType | None:
         async with session_maker() as session:
             session: AsyncSession
             query = select(cls.model).filter_by(**filter_data)
@@ -29,10 +35,11 @@ class BaseService:
             return result.scalar_one_or_none()
 
     @classmethod
-    async def insert_into_table(cls, data: dict):
+    async def insert_into_table(cls, data: dict) -> bool:
+        user_data = cls.pydantic_scheme(**data)
         async with session_maker() as session:
             session: AsyncSession
-            query = Insert(cls.model).values(**data)
+            query = Insert(cls.model).values(**user_data.model_dump())
             try:
                 await session.execute(query)
                 await session.commit()
@@ -41,7 +48,7 @@ class BaseService:
                 return False
 
     @classmethod
-    async def delete_by_id(cls, id_node: int):
+    async def delete_by_id(cls, id_node: int) -> None:
         async with session_maker() as session:
             session: AsyncSession
             query = Delete(cls.model).filter_by(id=id_node)

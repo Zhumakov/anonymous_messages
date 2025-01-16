@@ -11,11 +11,9 @@ from httpx import AsyncClient, Response
         ("test@gmail.com", "", status.HTTP_422_UNPROCESSABLE_ENTITY),
     ],
 )
-async def test_autoriztion(
-    email, password, status_code, async_client: AsyncClient
-):
+async def test_autorization(email, password, status_code, async_client: AsyncClient):
     response: Response = await async_client.post(
-        "/auth", data={"email": email, "password": password}
+        "/users", data={"email": email, "password": password}
     )
 
     assert response.status_code == status_code

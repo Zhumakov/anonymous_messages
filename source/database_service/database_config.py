@@ -17,7 +17,7 @@ if settings.MODE == "TEST":
         f"{settings.TEST_DB_USER}:{settings.TEST_DB_PASS}"
         f"@{settings.TEST_DB_HOST}:{settings.TEST_DB_PORT}/{settings.TEST_DB_NAME}"
     )
-    DATABASE_PARAMS = {"poolclass": NullPool, "echo": True}
+    DATABASE_PARAMS = {"poolclass": NullPool}
 
 else:
     DATABASE_URL = (

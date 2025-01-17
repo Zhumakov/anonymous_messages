@@ -2,10 +2,19 @@
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import Insert
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from source.main import app as FastApi_app
-from source.database_service.database_config import async_engine
+from source.auth.models import Users
 from source.database_service.Base import Base
+from source.database_service.database_config import (
+    DATABASE_PARAMS,
+    DATABASE_URL,
+    create_async_engine,
+    async_engine,
+    session_maker
+)
+from source.main import app as FastApi_app
 from source.settings import settings
 
 
@@ -15,10 +24,22 @@ async def async_client():
         yield ac
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session", autouse=True)
 async def init_database():
     assert settings.MODE == "TEST"
 
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
+    async with session_maker() as session:
+        session: AsyncSession
+        query = Insert(Users).values(
+            {
+                "username": "logintest",
+                "email": "logintest@gmail.com",
+                "hashed_password": "pasword",
+            }
+        )
+        await session.execute(query)
+        await session.commit()

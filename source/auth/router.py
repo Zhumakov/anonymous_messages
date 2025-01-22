@@ -1,11 +1,10 @@
-from re import U
-from fastapi import APIRouter, HTTPException, Response, status
-from jose.exceptions import JWTError
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
+from source.auth.auth import register_user, set_tokens_in_cookies
+from source.auth.dependenties import get_current_user, get_refresh_token, verify_refresh_token
+from source.auth.models import Users
+from source.auth.schemas import SUserLogin, SUserRequest, SUserResponse
 from source.auth.service import UsersService
-from source.auth.schemas import SUserLogin, SUserRequest
-from source.auth.auth import get_hash_password, create_session_token
-
 
 router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
 
@@ -23,21 +22,14 @@ async def create_user(user_data: SUserRequest):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="User with this username alredy exist"
         )
-
-    hashed_password = get_hash_password(user_data.password)
-    await UsersService.insert_into_table(
-        username=user_data.username, email=user_data.email, hashed_password=hashed_password
-    )
+    await register_user(user_data)
 
 
-@router.get(path="", description="Get current User, need Session token")
-async def get_current_user():
-    pass
-
-
-@router.delete(path="", description="Delete current user, need Session token")
-async def delete_current_user():
-    pass
+@router.get(
+    path="", response_model=SUserResponse, description="Get current User, need Session token"
+)
+async def get_auth_user(user: Users = Depends(get_current_user)):
+    return user
 
 
 @router.patch(path="", description="Switch password, need Session token")
@@ -46,18 +38,33 @@ async def switch_password_current_user():
 
 
 @router.post(path="/auth", description="Authenticate user")
-async def auth_user(response: Response, user_data: SUserLogin):
-    user = await UsersService.get_one_or_none(email=user_data.email)
+async def login_user(response: Response, user_data: SUserLogin):
+    user = await UsersService.authenticate_user(email=user_data.email, password=user_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not autorized"
         )
 
-    session_token = create_session_token(sub=user_data.email)
-    response.set_cookie("anonym_site_token", session_token, httponly=True)
-    return {"anonym_site_token": session_token}
+    response, session_token, refresh_token = await set_tokens_in_cookies(response, str(user.id))
+    return {"anonym_site_token": session_token, "anonym_refresh_token": refresh_token}
 
 
-@router.delete(path="/auth", description="Logout current user, need Session token")
-async def logout_user():
-    pass
+@router.get(path="/auth/refresh", description="Refresh session token")
+async def refresh_tokens(response: Response, refresh_token: str = Depends(get_refresh_token)):
+    if not (user := await verify_refresh_token(refresh_token)):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token id is invalid"
+        )
+
+    response, session_token, refresh_token = await set_tokens_in_cookies(response, str(user.id))
+    return {"anonym_site_token": session_token, "anonym_refresh_token": refresh_token}
+
+
+@router.delete(
+    path="/auth",
+    description="Logout of the current user, need Session token",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def logout_user(response: Response):
+    response.delete_cookie("anonym_site_token")
+    response.delete_cookie("anonym_refresh_token")

@@ -14,3 +14,8 @@ class SUserLogin(BaseModel):
 
 class SUserRequest(SUserLogin):
     username: str
+
+
+class SUserResponse(BaseModel):
+    username: str
+    email: EmailStr

@@ -1,26 +1,45 @@
+import uuid
 from datetime import datetime, timedelta, timezone
-from passlib.context import CryptContext
-from jose import jwt
 
-from source.settings import settings
+from fastapi import Response
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def get_hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+from source.auth.schemas import SUserRequest
+from source.auth.service import UsersService
+from source.auth.utils import hash_password, jwt_encode
 
 
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def create_session_token(**kwargs) -> str:
-    to_encode = kwargs.copy()
-    expire =str(datetime.now(timezone.utc) + timedelta(minutes=15))
-    to_encode.update({"expire": expire})
-    encoded_jwt = jwt.encode(
-        claims=to_encode, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
+async def register_user(user_data: SUserRequest):
+    hashed_password = hash_password(user_data.password)
+    await UsersService.insert_into_table(
+        username=user_data.username, email=user_data.email, hashed_password=hashed_password
     )
-    return encoded_jwt
+
+
+async def create_refresh_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(days=30)
+
+    token_id = str(uuid.uuid4())
+    await UsersService.set_refresh_token_id(token_id=token_id, user_id=int(user_id))
+
+    to_encode = {
+        "sub": str(user_id),
+        "token_id": token_id,
+        "exp": expire,
+    }
+
+    return jwt_encode(to_encode)
+
+
+async def create_session_token(user_id: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    to_encode = {"sub": user_id, "exp": expire}
+    return jwt_encode(to_encode)
+
+
+async def set_tokens_in_cookies(response: Response, user_id: str) -> tuple[Response, str, str]:
+    session_token = await create_session_token(user_id)
+    refresh_token = await create_refresh_token(user_id)
+    response.set_cookie("anonym_site_token", session_token)
+    response.set_cookie("anonym_refresh_token", refresh_token)
+
+    return response, session_token, refresh_token

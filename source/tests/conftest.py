@@ -7,13 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from source.auth.models import Users
 from source.database_service.Base import Base
-from source.database_service.database_config import (
-    DATABASE_PARAMS,
-    DATABASE_URL,
-    create_async_engine,
-    async_engine,
-    session_maker
-)
+from source.database_service.database_config import async_engine, session_maker
 from source.main import app as FastApi_app
 from source.settings import settings
 
@@ -38,8 +32,17 @@ async def init_database():
             {
                 "username": "logintest",
                 "email": "logintest@gmail.com",
-                "hashed_password": "pasword",
+                "hashed_password": "password",
             }
         )
         await session.execute(query)
         await session.commit()
+
+
+@pytest.fixture(scope="function")
+async def auth_async_client():
+    async with AsyncClient(transport=ASGITransport(app=FastApi_app), base_url="http://test") as ac:
+        await ac.post("/users/auth", json={"email": "logintest@gmail.com", "password": "pasword"})
+        assert ac.cookies.get("anonym_site_token", "")
+        assert ac.cookies.get("anonym_refresh_token", "")
+        yield ac

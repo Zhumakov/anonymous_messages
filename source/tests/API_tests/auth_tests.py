@@ -37,3 +37,24 @@ async def test_login(email: str, password, status_code, async_client: AsyncClien
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert response.cookies.get("anonym_site_token", "")
+        assert response.cookies.get("anonym_refresh_token", "")
+
+
+async def test_logout(auth_async_client: AsyncClient):
+    await auth_async_client.delete("/users/auth")
+    assert not auth_async_client.cookies.get("anonym_site_token", "")
+    assert not auth_async_client.cookies.get("anonym_refresh_token", "")
+
+
+async def test_get_current_user(auth_async_client: AsyncClient):
+    response: Response = await auth_async_client.get("/users")
+    user = response.json()
+    assert not user
+
+
+async def test_refresh_tokens(auth_async_client: AsyncClient):
+    previous_token = auth_async_client.cookies.get("anonym_refresh_token")
+    response: Response = await auth_async_client.get("/users/auth/refresh")
+    new_token = response.cookies.get("anonym_refresh_token")
+
+    assert previous_token != new_token

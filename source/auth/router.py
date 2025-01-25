@@ -3,14 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from source.auth.auth import register_user, set_tokens_in_cookies
 from source.auth.dependenties import get_current_user, get_refresh_token, verify_refresh_token
 from source.auth.models import Users
-from source.auth.schemas import SUserLogin, SUserRequest, SUserResponse
+from source.auth.schemas import SUserLogin, SUserRegistration, SUserResponse
 from source.auth.service import UsersService
 
 router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
 
 
 @router.post(path="", description="Registration user", status_code=status.HTTP_201_CREATED)
-async def create_user(user_data: SUserRequest):
+async def create_user(user_data: SUserRegistration):
     existing_user = await UsersService.get_one_or_none(email=user_data.email)
     if existing_user:
         raise HTTPException(

@@ -1,5 +1,6 @@
 from typing import Generic, Type, TypeVar
 
+from pydantic import BaseModel, ValidationError
 from sqlalchemy import Delete, Insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,12 +8,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from source.database_service.database_config import Base, session_maker
 
 ModelType = TypeVar("ModelType", bound=Base)
+FilterModelScheme = TypeVar("FilterModelScheme", bound=BaseModel)
+ModelNodeScheme = TypeVar("ModelNodeScheme", bound=BaseModel)
 
 
-class BaseService(Generic[ModelType]):
+class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme]):
     """Class for shared database functions"""
 
     model: Type[ModelType]
+    filter_model_scheme: Type[FilterModelScheme]
+    model_node_scheme: Type[ModelNodeScheme]
 
     @classmethod
     async def get_by_id(cls, model_id: int) -> ModelType | None:
@@ -24,6 +29,10 @@ class BaseService(Generic[ModelType]):
 
     @classmethod
     async def get_one_or_none(cls, **kwargs) -> ModelType | None:
+        cls.filter_model_scheme.model_validate(kwargs)
+        if not kwargs:
+            raise ValidationError("Input dictionary cannot be empty.", ())
+
         async with session_maker() as session:
             session: AsyncSession
             query = select(cls.model).filter_by(**kwargs)
@@ -32,6 +41,8 @@ class BaseService(Generic[ModelType]):
 
     @classmethod
     async def insert_into_table(cls, **kwargs) -> bool:
+        cls.filter_model_scheme.model_validate(kwargs)
+
         async with session_maker() as session:
             session: AsyncSession
             query = Insert(cls.model).values(**kwargs)
@@ -44,6 +55,11 @@ class BaseService(Generic[ModelType]):
 
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict) -> bool:
+        cls.filter_model_scheme.model_validate(filter_by)
+        cls.filter_model_scheme.model_validate(values)
+        if not filter_by or not values:
+            raise ValidationError("Input dictionaries cannot be empty.", ())
+
         async with session_maker() as session:
             session: AsyncSession
             query = update(cls.model).filter_by(**filter_by).values(**values)

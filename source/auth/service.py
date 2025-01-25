@@ -1,12 +1,15 @@
 from fastapi import HTTPException, status
 
 from source.auth.models import Users
+from source.auth.schemas import SUserFilterQuery, SUserInsertQuery
 from source.auth.utils import verify_password
 from source.database_service.Base import BaseService
 
 
-class UsersService(BaseService[Users]):
+class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery]):
     model = Users
+    filter_model_scheme = SUserFilterQuery
+    model_node_scheme = SUserInsertQuery
 
     @classmethod
     async def authenticate_user(cls, email: str, password: str) -> Users:
@@ -16,10 +19,10 @@ class UsersService(BaseService[Users]):
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
             )
 
-        password_is_valid = verify_password(password, user.hashed_password)
+        password_is_valid = verify_password(password, str(user.hashed_password))
         if not password_is_valid:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Password is valid"
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Password is invalid"
             )
 
         return user

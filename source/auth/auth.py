@@ -3,12 +3,12 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import Response
 
-from source.auth.schemas import SUserRequest
+from source.auth.schemas import SUserRegistration
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, jwt_encode
 
 
-async def register_user(user_data: SUserRequest):
+async def register_user(user_data: SUserRegistration):
     hashed_password = hash_password(user_data.password)
     await UsersService.insert_into_table(
         username=user_data.username, email=user_data.email, hashed_password=hashed_password

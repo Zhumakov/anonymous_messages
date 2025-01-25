@@ -49,7 +49,7 @@ async def test_logout(auth_async_client: AsyncClient):
 async def test_get_current_user(auth_async_client: AsyncClient):
     response: Response = await auth_async_client.get("/users")
     user = response.json()
-    assert not user
+    assert user == {"email": "logintest@gmail.com", "username": "logintest"}
 
 
 async def test_refresh_tokens(auth_async_client: AsyncClient):

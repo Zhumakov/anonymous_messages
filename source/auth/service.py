@@ -29,8 +29,7 @@ class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery]):
 
     @classmethod
     async def set_refresh_token_id(cls, token_id: str, user_id: int) -> bool:
-        user = await cls.get_one_or_none(id=user_id)
-        if not user:
+        if not await cls.get_by_id(user_id):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
             )

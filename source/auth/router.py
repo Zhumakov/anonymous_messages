@@ -65,6 +65,8 @@ async def refresh_tokens(response: Response, refresh_token: str = Depends(get_re
     description="Logout of the current user, need Session token",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def logout_user(response: Response):
+async def logout_user(response: Response, user=Depends(get_current_user)):
+    await UsersService.set_refresh_token_id(token_id="", user_id=user.id)
+
     response.delete_cookie("anonym_site_token")
     response.delete_cookie("anonym_refresh_token")

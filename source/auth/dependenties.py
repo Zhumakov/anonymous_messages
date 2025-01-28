@@ -67,7 +67,7 @@ async def verify_refresh_token(refresh_token: str) -> bool | Users:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Token id is not found"
         )
 
-    if user.refresh_token_id != token_id:
+    if user.refresh_token_id != token_id or not str(user.refresh_token_id):
         return False
 
     return user

@@ -41,17 +41,14 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme]):
 
     @classmethod
     async def insert_into_table(cls, **kwargs) -> bool:
-        cls.filter_model_scheme.model_validate(kwargs)
+        cls.model_node_scheme.model_validate(kwargs)
 
         async with session_maker() as session:
             session: AsyncSession
             query = Insert(cls.model).values(**kwargs)
-            try:
-                await session.execute(query)
-                await session.commit()
-                return True
-            except IntegrityError:
-                return False
+            await session.execute(query)
+            await session.commit()
+            return True
 
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict) -> bool:

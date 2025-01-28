@@ -1,19 +1,13 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, validator
+from pydantic import BaseModel, EmailStr, Field
 
 
 class SUserLogin(BaseModel):
     """Using for login"""
 
     email: EmailStr
-    password: str
-
-    @field_validator("password")
-    def validate_password(cls, value: str):
-        if len(value) < 4:
-            raise ValueError("Password must be len >= 4")
-        return value
+    password: str = Field(..., min_length=4)
 
 
 class SUserRegistration(SUserLogin):
@@ -35,7 +29,6 @@ class SUserFilterQuery(BaseModel):
     id: Optional[int] = None
     username: Optional[str] = None
     email: Optional[str] = None
-    hashed_password: Optional[str] = None
     refresh_token_id: Optional[str] = None
 
     model_config = {"strict": True, "extra": "forbid"}

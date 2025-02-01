@@ -1,7 +1,8 @@
 import pytest
-from fastapi import status
+from fastapi import HTTPException, status
 from httpx import AsyncClient, Response
 
+from source.auth.auth import register_user
 from source.auth.service import UsersService
 
 
@@ -62,3 +63,26 @@ async def test_refresh_tokens(auth_async_client: AsyncClient):
     new_token = response.cookies.get("anonym_refresh_token")
 
     assert previous_token != new_token
+
+
+async def test_switch_passwords(async_client: AsyncClient):
+    await async_client.post(
+        "/users", json={"username": "switch", "email": "email@gmail.com", "password": "password"}
+    )
+    response: Response = await async_client.post(
+        "/users/auth", json={"email": "email@gmail.com", "password": "password"}
+    )
+    session_token = response.cookies["anonym_site_token"]
+
+    response: Response = await async_client.patch(
+        "/users",
+        json={"new_password": "new_password"},
+        cookies={"anonym_site_token": session_token},
+    )
+
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    try:
+        await UsersService.authenticate_user(email="logintest@gmail.com", password="password")
+        assert False  # Fail
+    except HTTPException as exc:
+        assert exc.status_code == status.HTTP_401_UNAUTHORIZED

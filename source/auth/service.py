@@ -1,14 +1,16 @@
 from fastapi import HTTPException, status
 
 from source.auth.models import Users
-from source.auth.schemas import SUserFilterQuery, SUserInsertQuery
-from source.auth.utils import verify_password
+from source.auth.schemas import SUserFilterQuery, SUserInsertQuery, SUserUpdateQuery
+from source.auth.utils import hash_password, verify_password
 from source.database_service.Base import BaseService
 
 
-class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery]):
+class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery, SUserUpdateQuery]):
+
     model = Users
     filter_model_scheme = SUserFilterQuery
+    update_model_scheme = SUserUpdateQuery
     model_node_scheme = SUserInsertQuery
 
     @classmethod
@@ -36,5 +38,19 @@ class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery]):
 
         filter_by = {"id": user_id}
         values = {"refresh_token_id": token_id}
+        set_result = await cls.update_node(filter_by, values)
+        return set_result
+
+    @classmethod
+    async def switch_password(cls, new_password: str, user_id: int):
+        if not await cls.get_by_id(user_id):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
+            )
+
+        hashed_password = hash_password(new_password)
+
+        filter_by = {"id": user_id}
+        values = {"hashed_password": hashed_password}
         set_result = await cls.update_node(filter_by, values)
         return set_result

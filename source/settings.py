@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     MODE: Literal["DEV", "TEST", "PROD"]
 
+    API_ADRESS: str
+
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -25,6 +27,11 @@ class Settings(BaseSettings):
 
     SECRET_KEY: str
     ALGORITHM: str
+
+    SMTP_SERVER: str
+    SMTP_PORT: int
+    SMTP_USER: str
+    SMTP_PASS: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

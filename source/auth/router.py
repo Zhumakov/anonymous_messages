@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 
 from source.auth.auth import register_user, set_tokens_in_cookies
-from source.auth.dependenties import get_current_user, get_refresh_token, verify_refresh_token
+from source.auth.dependenties import get_current_user, verify_refresh_token
 from source.auth.models import Users
 from source.auth.schemas import SUserLogin, SUserRegistration, SUserResponse
 from source.auth.service import UsersService
@@ -32,9 +32,13 @@ async def get_auth_user(user: Users = Depends(get_current_user)):
     return user
 
 
-@router.patch(path="", description="Switch password, need Session token")
-async def switch_password_current_user():
-    pass
+@router.patch(
+    path="",
+    description="Switch password, need Session token",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def switch_password_current_user(new_password: str, user: Users = Depends(get_current_user)):
+    await UsersService.switch_password(new_password=new_password, user_id=user.id)
 
 
 @router.post(path="/auth", description="Authenticate user")
@@ -50,8 +54,10 @@ async def login_user(response: Response, user_data: SUserLogin):
 
 
 @router.get(path="/auth/refresh", description="Refresh session token")
-async def refresh_tokens(response: Response, refresh_token: str = Depends(get_refresh_token)):
-    if not (user := await verify_refresh_token(refresh_token)):
+async def refresh_tokens(
+    response: Response, anonym_refresh_token: str = Cookie(description="Cookie for refresh tokens")
+):
+    if not (user := await verify_refresh_token(anonym_refresh_token)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token id is invalid"
         )
@@ -65,7 +71,7 @@ async def refresh_tokens(response: Response, refresh_token: str = Depends(get_re
     description="Logout of the current user, need Session token",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def logout_user(response: Response, user=Depends(get_current_user)):
+async def logout_user(response: Response, user: Users = Depends(get_current_user)):
     await UsersService.set_refresh_token_id(token_id="", user_id=user.id)
 
     response.delete_cookie("anonym_site_token")

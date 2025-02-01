@@ -24,7 +24,7 @@ class SUserResponse(BaseModel):
 
 
 class SUserFilterQuery(BaseModel):
-    """Using in FILTER BY and in UPDATE queryes"""
+    """Using in the FILTER BY query"""
 
     id: Optional[int] = None
     username: Optional[str] = None
@@ -34,8 +34,17 @@ class SUserFilterQuery(BaseModel):
     model_config = {"strict": True, "extra": "forbid"}
 
 
+class SUserUpdateQuery(BaseModel):
+    """Using in the UPDATE query"""
+
+    username: str
+    email: EmailStr
+    hashed_password: str
+    refresh_token_id: Optional[str] = None
+
+
 class SUserInsertQuery(BaseModel):
-    """Using in INSERT queryes"""
+    """Using in the INSERT queryes"""
 
     username: str
     email: EmailStr

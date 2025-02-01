@@ -9,14 +9,16 @@ from source.database_service.database_config import Base, session_maker
 
 ModelType = TypeVar("ModelType", bound=Base)
 FilterModelScheme = TypeVar("FilterModelScheme", bound=BaseModel)
+UpdateModelScheme = TypeVar("UpdateModelScheme", bound=BaseModel)
 ModelNodeScheme = TypeVar("ModelNodeScheme", bound=BaseModel)
 
 
-class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme]):
+class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateModelScheme]):
     """Class for shared database functions"""
 
     model: Type[ModelType]
     filter_model_scheme: Type[FilterModelScheme]
+    update_model_scheme: Type[UpdateModelScheme]
     model_node_scheme: Type[ModelNodeScheme]
 
     @classmethod
@@ -53,7 +55,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme]):
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict) -> bool:
         cls.filter_model_scheme.model_validate(filter_by)
-        cls.filter_model_scheme.model_validate(values)
+        cls.update_model_scheme.model_validate(values)
         if not filter_by or not values:
             raise ValidationError("Input dictionaries cannot be empty.", ())
 

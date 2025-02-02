@@ -48,9 +48,12 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
         async with session_maker() as session:
             session: AsyncSession
             query = Insert(cls.model).values(**kwargs)
+        try:
             await session.execute(query)
             await session.commit()
             return True
+        except IntegrityError:
+            return False
 
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict) -> bool:

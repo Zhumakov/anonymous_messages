@@ -1,5 +1,8 @@
+import uuid
+
 from fastapi import HTTPException, status
 
+from source import exceptions
 from source.auth.models import Users
 from source.auth.schemas import SUserFilterQuery, SUserInsertQuery, SUserUpdateQuery
 from source.auth.utils import hash_password, verify_password
@@ -17,24 +20,18 @@ class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery, SUserU
     async def authenticate_user(cls, email: str, password: str) -> Users:
         user = await cls.get_one_or_none(email=email)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
-            )
+            raise exceptions.UserIsNotExistHTTPException
 
         password_is_valid = verify_password(password, str(user.hashed_password))
         if not password_is_valid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Password is invalid"
-            )
+            raise exceptions.PasswordIsInvalidHTTPException
 
         return user
 
     @classmethod
     async def set_refresh_token_id(cls, token_id: str, user_id: int) -> bool:
         if not await cls.get_by_id(user_id):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
-            )
+            raise exceptions.UserIsNotExistHTTPException
 
         filter_by = {"id": user_id}
         values = {"refresh_token_id": token_id}
@@ -44,9 +41,7 @@ class UsersService(BaseService[Users, SUserFilterQuery, SUserInsertQuery, SUserU
     @classmethod
     async def switch_password(cls, new_password: str, user_id: int):
         if not await cls.get_by_id(user_id):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not exist"
-            )
+            raise exceptions.UserIsNotExistHTTPException
 
         hashed_password = hash_password(new_password)
 

@@ -10,10 +10,12 @@ class SUserLogin(BaseModel):
     password: str = Field(..., min_length=4)
 
 
-class SUserRegistration(SUserLogin):
+class SUserRegistration(BaseModel):
     """Using for registration"""
 
     username: str
+    email: EmailStr
+    password: str = Field(..., min_length=4)
 
 
 class SUserResponse(BaseModel):
@@ -23,6 +25,12 @@ class SUserResponse(BaseModel):
     email: EmailStr
 
 
+class SUserSwitchPassword(BaseModel):
+    """Using for switch_password"""
+
+    password: str = Field(..., min_length=4)
+
+
 class SUserFilterQuery(BaseModel):
     """Using in the FILTER BY query"""
 
@@ -30,6 +38,7 @@ class SUserFilterQuery(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
     refresh_token_id: Optional[str] = None
+    register_token: Optional[str] = None
 
     model_config = {"strict": True, "extra": "forbid"}
 
@@ -37,10 +46,11 @@ class SUserFilterQuery(BaseModel):
 class SUserUpdateQuery(BaseModel):
     """Using in the UPDATE query"""
 
-    username: str
-    email: EmailStr
-    hashed_password: str
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    hashed_password: Optional[str] = None
     refresh_token_id: Optional[str] = None
+    register_token: Optional[str] = None
 
 
 class SUserInsertQuery(BaseModel):

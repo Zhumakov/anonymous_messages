@@ -8,11 +8,12 @@ from source.auth.service import UsersService
 from source.auth.utils import hash_password, jwt_encode
 
 
-async def register_user(user_data: SUserRegistration):
+async def register_user(user_data: SUserRegistration) -> bool:
     hashed_password = hash_password(user_data.password)
-    await UsersService.insert_into_table(
+    result = await UsersService.insert_into_table(
         username=user_data.username, email=user_data.email, hashed_password=hashed_password
     )
+    return result
 
 
 async def create_refresh_token(user_id: str) -> str:

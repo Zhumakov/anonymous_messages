@@ -4,6 +4,7 @@ from jose import jwt
 from pydantic import ValidationError
 
 from source.auth.auth import create_refresh_token, create_session_token
+from source.auth.email_service import create_message_for_register, create_unique_url
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, verify_password
 from source.settings import settings
@@ -132,3 +133,20 @@ class TestsAuth:
             refresh_token, settings.SECRET_KEY, settings.ALGORITHM
         ).get("token_id")
         assert token_id_from_table == token_id_from_token
+
+
+# class TestsEmailService:
+
+#     @staticmethod
+#     async def test_create_unique_url():
+#         url = create_unique_url()
+#         assert settings.API_ADRESS in url
+
+#     @staticmethod
+#     async def test_create_message():
+#         message_to = "test@example.com"
+#         message = create_message_for_register(message_to)
+#         assert message
+#         assert message["From"] == settings.SMTP_USER
+#         assert message["To"] == message_to
+#         assert settings.API_ADRESS in message.get_content()

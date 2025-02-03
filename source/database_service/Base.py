@@ -14,7 +14,7 @@ ModelNodeScheme = TypeVar("ModelNodeScheme", bound=BaseModel)
 
 
 class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateModelScheme]):
-    """Class for shared database functions"""
+    """A class that implements basic CRUD operations"""
 
     model: Type[ModelType]
     filter_model_scheme: Type[FilterModelScheme]
@@ -22,7 +22,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
     model_node_scheme: Type[ModelNodeScheme]
 
     @classmethod
-    async def get_by_id(cls, model_id: int) -> ModelType | None:
+    async def _get_by_id(cls, model_id: int) -> ModelType | None:
         async with session_maker() as session:
             session: AsyncSession
             query = select(cls.model).filter_by(id=model_id)
@@ -30,7 +30,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             return result.scalar_one_or_none()
 
     @classmethod
-    async def get_one_or_none(cls, **kwargs) -> ModelType | None:
+    async def _get_one_or_none(cls, **kwargs) -> ModelType | None:
         cls.filter_model_scheme.model_validate(kwargs)
         if not kwargs:
             raise ValidationError("Input dictionary cannot be empty.", ())
@@ -42,7 +42,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             return result.scalar_one_or_none()
 
     @classmethod
-    async def insert_into_table(cls, **kwargs) -> bool:
+    async def _insert_into_table(cls, **kwargs) -> bool:
         cls.model_node_scheme.model_validate(kwargs)
 
         async with session_maker() as session:
@@ -56,7 +56,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             return False
 
     @classmethod
-    async def update_node(cls, filter_by: dict, values: dict) -> bool:
+    async def _update_node(cls, filter_by: dict, values: dict) -> bool:
         cls.filter_model_scheme.model_validate(filter_by)
         cls.update_model_scheme.model_validate(values)
         if not filter_by or not values:
@@ -73,7 +73,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
                 return False
 
     @classmethod
-    async def delete_by_id(cls, id_node: int) -> None:
+    async def _delete_by_id(cls, id_node: int) -> None:
         async with session_maker() as session:
             session: AsyncSession
             query = Delete(cls.model).filter_by(id=id_node)

@@ -1,15 +1,15 @@
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie
 from jose import JWTError, jwt
 
 from source import exceptions
-from source.auth.models import Users
+from source.auth.models import User
 from source.auth.service import UsersService
 from source.settings import settings
 
 
 async def get_current_user(
     anonym_site_token: str = Cookie(description="Token for autorize"),
-) -> Users:
+) -> User:
     try:
         payload = jwt.decode(
             anonym_site_token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
@@ -21,7 +21,7 @@ async def get_current_user(
     if not user_id:
         raise exceptions.TokenDataHTTPException
 
-    user = await UsersService.get_by_id(int(user_id))
+    user = await UsersService._get_by_id(int(user_id))
     if not user:
         raise exceptions.UserIsNotExistHTTPException
 
@@ -30,7 +30,7 @@ async def get_current_user(
 
 async def verify_refresh_token(
     anonym_site_refresh: str = Cookie(description="Cookie for refresh tokens"),
-) -> Users:
+) -> User:
     try:
         payload = jwt.decode(
             anonym_site_refresh, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM
@@ -38,7 +38,7 @@ async def verify_refresh_token(
     except JWTError:
         raise exceptions.TokenValidHTTPException
 
-    user: Users = await get_current_user(anonym_site_refresh)
+    user: User = await get_current_user(anonym_site_refresh)
 
     token_id = payload.get("token_id")
     if not token_id:

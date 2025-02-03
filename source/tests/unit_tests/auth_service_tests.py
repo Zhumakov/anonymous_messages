@@ -4,7 +4,6 @@ from jose import jwt
 from pydantic import ValidationError
 
 from source.auth.auth import create_refresh_token, create_session_token
-from source.auth.email_service import create_message_for_register, create_unique_url
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, verify_password
 from source.settings import settings
@@ -14,16 +13,17 @@ class TestsService:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "username,email,password,result",
+        "username,user_uid,email,password,result",
         [
-            ("user1", "test@email.com", "password", True),
-            ("user1", "test2@email.com", "password", False),
-            ("user2", "test@email.com", "password", False),
+            ("user1", "2", "test@email.com", "password", True),
+            ("user1", "3", "test2@email.com", "password", False),
+            ("user2", "4", "test@email.com", "password", False),
+            ("user3", "2", "test@email.com", "password", False),
         ],
     )
-    async def test_create_user(username, email, password, result):
-        query_reslut = await UsersService.insert_into_table(
-            username=username, email=email, hashed_password=password
+    async def test_create_user(username, user_uid, email, password, result):
+        query_reslut = await UsersService._insert_into_table(
+            username=username, email=email, hashed_password=password, user_uid=user_uid
         )
         assert query_reslut == result
 
@@ -40,7 +40,7 @@ class TestsService:
     )
     async def test_get_one_or_none(filter_by: dict, validation_error: bool):
         try:
-            assert await UsersService.get_one_or_none(**filter_by)
+            assert await UsersService._get_one_or_none(**filter_by)
         except ValidationError:
             assert validation_error
 
@@ -57,7 +57,7 @@ class TestsService:
     )
     async def test_update_node(filter_by: dict, values: dict, validation_error: bool):
         try:
-            result = await UsersService.update_node(filter_by=filter_by, values=values)
+            result = await UsersService._update_node(filter_by=filter_by, values=values)
             assert result
         except ValidationError:
             assert validation_error
@@ -92,6 +92,14 @@ class TestsService:
         except HTTPException:
             assert http_error
 
+    @staticmethod
+    async def test_switch_passwords():
+        current_password = "password"
+        new_password = "new_password"
+        user_email = "logintest@gmail.com"
+        result = await UsersService.switch_password(current_password, new_password, user_email)
+        assert result
+
 
 class TestsUtils:
 
@@ -125,7 +133,7 @@ class TestsAuth:
         user_id = "1"
         refresh_token = await create_refresh_token(user_id)
 
-        user = await UsersService.get_one_or_none(id=int(user_id))
+        user = await UsersService._get_one_or_none(id=int(user_id))
         assert user
 
         token_id_from_table = user.refresh_token_id
@@ -133,20 +141,3 @@ class TestsAuth:
             refresh_token, settings.SECRET_KEY, settings.ALGORITHM
         ).get("token_id")
         assert token_id_from_table == token_id_from_token
-
-
-# class TestsEmailService:
-
-#     @staticmethod
-#     async def test_create_unique_url():
-#         url = create_unique_url()
-#         assert settings.API_ADRESS in url
-
-#     @staticmethod
-#     async def test_create_message():
-#         message_to = "test@example.com"
-#         message = create_message_for_register(message_to)
-#         assert message
-#         assert message["From"] == settings.SMTP_USER
-#         assert message["To"] == message_to
-#         assert settings.API_ADRESS in message.get_content()

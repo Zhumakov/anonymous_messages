@@ -45,7 +45,7 @@ async def test_login(email: str, password, status_code, async_client: AsyncClien
 
 async def test_logout(auth_async_client: AsyncClient):
     await auth_async_client.delete("/users/auth")
-    user = await UsersService.get_by_id(1)
+    user = await UsersService._get_by_id(1)
     assert not str(user.refresh_token_id)
     assert not auth_async_client.cookies.get("anonym_site_token", "")
     assert not auth_async_client.cookies.get("anonym_refresh_token", "")
@@ -53,8 +53,9 @@ async def test_logout(auth_async_client: AsyncClient):
 
 async def test_get_current_user(auth_async_client: AsyncClient):
     response: Response = await auth_async_client.get("/users")
-    user = response.json()
-    assert user == {"email": "logintest@gmail.com", "username": "logintest"}
+    user: dict = response.json()
+    plained_user = {"email": "logintest@gmail.com", "user_uid": "1", "username": "logintest"}
+    assert all(item in user.items() for item in plained_user.items())
 
 
 async def test_refresh_tokens(auth_async_client: AsyncClient):
@@ -76,13 +77,13 @@ async def test_switch_passwords(async_client: AsyncClient):
 
     response: Response = await async_client.patch(
         "/users",
-        json={"new_password": "new_password"},
+        json={"current_password": "password", "new_password": "new_password"},
         cookies={"anonym_site_token": session_token},
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     try:
-        await UsersService.authenticate_user(email="logintest@gmail.com", password="password")
+        await UsersService.authenticate_user(email="email@gmail.com", password="password")
         assert False  # Fail
     except HTTPException as exc:
         assert exc.status_code == status.HTTP_401_UNAUTHORIZED

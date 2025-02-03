@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, Response, status
 
 from source import exceptions
 from source.auth.auth import register_user, set_tokens_in_cookies
 from source.auth.dependenties import get_current_user, verify_refresh_token
-from source.auth.models import Users
+from source.auth.models import User
 from source.auth.schemas import SUserLogin, SUserRegistration, SUserResponse, SUserSwitchPassword
 from source.auth.service import UsersService
 
@@ -12,11 +12,11 @@ router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
 
 @router.post(path="", description="Registration user", status_code=status.HTTP_201_CREATED)
 async def create_user(user_data: SUserRegistration):
-    existing_user = await UsersService.get_one_or_none(email=user_data.email)
+    existing_user = await UsersService._get_one_or_none(email=user_data.email)
     if existing_user:
         raise exceptions.ExistingUserHTTPException
 
-    existing_username = await UsersService.get_one_or_none(username=user_data.username)
+    existing_username = await UsersService._get_one_or_none(username=user_data.username)
     if existing_username:
         raise exceptions.ExistingUsernameHTTPException
 
@@ -29,7 +29,7 @@ async def create_user(user_data: SUserRegistration):
 @router.get(
     path="", response_model=SUserResponse, description="Get current User, need Session token"
 )
-async def get_auth_user(user: Users = Depends(get_current_user)):
+async def get_auth_user(user: User = Depends(get_current_user)):
     return user
 
 
@@ -39,9 +39,13 @@ async def get_auth_user(user: Users = Depends(get_current_user)):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def switch_password_current_user(
-    password: SUserSwitchPassword, user: Users = Depends(get_current_user)
+    passwords: SUserSwitchPassword, user: User = Depends(get_current_user)
 ):
-    await UsersService.switch_password(new_password=password.password, user_id=user.id)
+    result = await UsersService.switch_password(
+        passwords.current_password, passwords.new_password, str(user.email)
+    )
+    if not result:
+        raise exceptions.ServerError
 
 
 @router.post(path="/auth", description="Authenticate user")
@@ -66,7 +70,7 @@ async def refresh_tokens(
     description="Logout of the current user, need Session token",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def logout_user(response: Response, user: Users = Depends(get_current_user)):
+async def logout_user(response: Response, user: User = Depends(get_current_user)):
     await UsersService.set_refresh_token_id(token_id="", user_id=user.id)
 
     response.delete_cookie("anonym_site_token")

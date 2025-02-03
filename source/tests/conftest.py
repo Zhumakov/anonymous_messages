@@ -5,7 +5,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import Insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from source.auth.models import Users
+from source.auth.models import User
 from source.auth.utils import hash_password
 from source.database_service.Base import Base
 from source.database_service.database_config import async_engine, session_maker
@@ -29,9 +29,10 @@ async def init_database():
 
     async with session_maker() as session:
         session: AsyncSession
-        query = Insert(Users).values(
+        query = Insert(User).values(
             {
                 "username": "logintest",
+                "user_uid": "1",
                 "email": "logintest@gmail.com",
                 "hashed_password": hash_password("password"),
             }

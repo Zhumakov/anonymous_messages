@@ -10,8 +10,12 @@ from source.auth.utils import hash_password, jwt_encode
 
 async def register_user(user_data: SUserRegistration) -> bool:
     hashed_password = hash_password(user_data.password)
-    result = await UsersService.insert_into_table(
-        username=user_data.username, email=user_data.email, hashed_password=hashed_password
+    user_uid = str(uuid.uuid4())
+    result = await UsersService._insert_into_table(
+        username=user_data.username,
+        email=user_data.email,
+        hashed_password=hashed_password,
+        user_uid=user_uid,
     )
     return result
 

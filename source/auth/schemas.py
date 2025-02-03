@@ -23,18 +23,21 @@ class SUserResponse(BaseModel):
 
     username: str
     email: EmailStr
+    user_uid: str
 
 
 class SUserSwitchPassword(BaseModel):
     """Using for switch_password"""
 
-    password: str = Field(..., min_length=4)
+    current_password: str = Field(..., min_length=4)
+    new_password: str = Field(..., min_length=4)
 
 
 class SUserFilterQuery(BaseModel):
     """Using in the FILTER BY query"""
 
     id: Optional[int] = None
+    user_uid: Optional[str] = None
     username: Optional[str] = None
     email: Optional[str] = None
     refresh_token_id: Optional[str] = None
@@ -47,6 +50,7 @@ class SUserUpdateQuery(BaseModel):
     """Using in the UPDATE query"""
 
     username: Optional[str] = None
+    user_uid: Optional[str] = None
     email: Optional[EmailStr] = None
     hashed_password: Optional[str] = None
     refresh_token_id: Optional[str] = None
@@ -57,6 +61,7 @@ class SUserInsertQuery(BaseModel):
     """Using in the INSERT queryes"""
 
     username: str
+    user_uid: str
     email: EmailStr
     hashed_password: str
 

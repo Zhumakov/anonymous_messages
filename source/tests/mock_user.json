@@ -1,0 +1,14 @@
+[
+  {
+    "username": "logintest",
+    "user_uid": "1",
+    "email": "logintest@gmail.com",
+    "hashed_password": "$2b$12$l3jrjCHeTuTPiC7XIaKoj.kDnQkVcIJ//gE7I9CvXLTVSFvECEYOm"
+  },
+  {
+    "username": "messagetest",
+    "user_uid": "2",
+    "email": "messagetest@gmail.com",
+    "hashed_password": "$2b$12$l3jrjCHeTuTPiC7XIaKoj.kDnQkVcIJ//gE7I9CvXLTVSFvECEYOm"
+  }
+]

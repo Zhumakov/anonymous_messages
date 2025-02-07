@@ -1,16 +1,27 @@
 """This module contains prepared fixture for functional test for async requests."""
 
+import json
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import Insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from source.auth.models import User
-from source.auth.utils import hash_password
 from source.database_service.Base import Base
 from source.database_service.database_config import async_engine, session_maker
 from source.main import app as FastApi_app
+from source.messages.models import Message
 from source.settings import settings
+
+
+def open_json_mock(model: str):
+    with open(f"source/tests/mock_{model}.json") as file:
+        return json.load(file)
+
+
+users = open_json_mock("user")
+messages = open_json_mock("message")
 
 
 @pytest.fixture(scope="session")
@@ -29,15 +40,12 @@ async def init_database():
 
     async with session_maker() as session:
         session: AsyncSession
-        query = Insert(User).values(
-            {
-                "username": "logintest",
-                "user_uid": "1",
-                "email": "logintest@gmail.com",
-                "hashed_password": hash_password("password"),
-            }
-        )
-        await session.execute(query)
+        add_users = Insert(User).values(users)
+        add_messages = Insert(Message).values(messages)
+
+        await session.execute(add_users)
+        await session.execute(add_messages)
+
         await session.commit()
 
 

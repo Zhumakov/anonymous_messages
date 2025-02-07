@@ -14,7 +14,7 @@ class UsersService(BaseService[User, SUserFilterQuery, SUserInsertQuery, SUserUp
 
     @classmethod
     async def authenticate_user(cls, email: str, password: str) -> User:
-        user = await cls._get_one_or_none(email=email)
+        user = await cls.get_one_or_none(email=email)
         if not user:
             raise exceptions.UserIsNotExistHTTPException
 
@@ -26,12 +26,12 @@ class UsersService(BaseService[User, SUserFilterQuery, SUserInsertQuery, SUserUp
 
     @classmethod
     async def set_refresh_token_id(cls, token_id: str, user_id: int) -> bool:
-        if not await cls._get_by_id(user_id):
+        if not await cls.get_by_id(user_id):
             raise exceptions.UserIsNotExistHTTPException
 
         filter_by = {"id": user_id}
         values = {"refresh_token_id": token_id}
-        set_result = await cls._update_node(filter_by, values)
+        set_result = await cls.update_node(filter_by, values)
         return set_result
 
     @classmethod
@@ -42,5 +42,5 @@ class UsersService(BaseService[User, SUserFilterQuery, SUserInsertQuery, SUserUp
 
         filter_by = {"email": user_email}
         values = {"hashed_password": hashed_password}
-        set_result = await cls._update_node(filter_by, values)
+        set_result = await cls.update_node(filter_by, values)
         return set_result

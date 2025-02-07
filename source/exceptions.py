@@ -1,7 +1,5 @@
 from fastapi import HTTPException, status
 
-ServerError = HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 ExistingUserHTTPException = HTTPException(
     status_code=status.HTTP_409_CONFLICT, detail="User with this alredy exist"
 )
@@ -34,3 +32,15 @@ RefreshTokenIdIsNotValidHTTPException = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
     detail="Refresh token id is not valid, or the user is logged out",
 )
+
+MessageVerifyHTTPException = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN, detail="You have not received this message"
+)
+
+# -------------------------------------------------------------------------
+
+MessageCreateHTTPException = HTTPException(
+    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Couldn't send message"
+)
+
+ServerError = HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

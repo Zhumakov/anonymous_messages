@@ -2,7 +2,6 @@ import pytest
 from fastapi import HTTPException, status
 from httpx import AsyncClient, Response
 
-from source.auth.auth import register_user
 from source.auth.service import UsersService
 
 
@@ -45,7 +44,7 @@ async def test_login(email: str, password, status_code, async_client: AsyncClien
 
 async def test_logout(auth_async_client: AsyncClient):
     await auth_async_client.delete("/users/auth")
-    user = await UsersService._get_by_id(1)
+    user = await UsersService.get_by_id(1)
     assert not str(user.refresh_token_id)
     assert not auth_async_client.cookies.get("anonym_site_token", "")
     assert not auth_async_client.cookies.get("anonym_refresh_token", "")

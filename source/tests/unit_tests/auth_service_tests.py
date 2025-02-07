@@ -22,7 +22,7 @@ class TestsService:
         ],
     )
     async def test_create_user(username, user_uid, email, password, result):
-        query_reslut = await UsersService._insert_into_table(
+        query_reslut = await UsersService.insert_into_table(
             username=username, email=email, hashed_password=password, user_uid=user_uid
         )
         assert query_reslut == result
@@ -40,7 +40,7 @@ class TestsService:
     )
     async def test_get_one_or_none(filter_by: dict, validation_error: bool):
         try:
-            assert await UsersService._get_one_or_none(**filter_by)
+            assert await UsersService.get_one_or_none(**filter_by)
         except ValidationError:
             assert validation_error
 
@@ -57,7 +57,7 @@ class TestsService:
     )
     async def test_update_node(filter_by: dict, values: dict, validation_error: bool):
         try:
-            result = await UsersService._update_node(filter_by=filter_by, values=values)
+            result = await UsersService.update_node(filter_by=filter_by, values=values)
             assert result
         except ValidationError:
             assert validation_error
@@ -133,7 +133,7 @@ class TestsAuth:
         user_id = "1"
         refresh_token = await create_refresh_token(user_id)
 
-        user = await UsersService._get_one_or_none(id=int(user_id))
+        user = await UsersService.get_one_or_none(id=int(user_id))
         assert user
 
         token_id_from_table = user.refresh_token_id

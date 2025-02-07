@@ -12,11 +12,11 @@ router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
 
 @router.post(path="", description="Registration user", status_code=status.HTTP_201_CREATED)
 async def create_user(user_data: SUserRegistration):
-    existing_user = await UsersService._get_one_or_none(email=user_data.email)
+    existing_user = await UsersService.get_one_or_none(email=user_data.email)
     if existing_user:
         raise exceptions.ExistingUserHTTPException
 
-    existing_username = await UsersService._get_one_or_none(username=user_data.username)
+    existing_username = await UsersService.get_one_or_none(username=user_data.username)
     if existing_username:
         raise exceptions.ExistingUsernameHTTPException
 

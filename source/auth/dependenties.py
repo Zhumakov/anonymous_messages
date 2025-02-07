@@ -21,7 +21,7 @@ async def get_current_user(
     if not user_id:
         raise exceptions.TokenDataHTTPException
 
-    user = await UsersService._get_by_id(int(user_id))
+    user = await UsersService.get_by_id(int(user_id))
     if not user:
         raise exceptions.UserIsNotExistHTTPException
 

@@ -32,7 +32,7 @@ async def get_messsages_on_category(
         case "sended":
             results = await MessagesService.get_all(from_user_uid=user_uid)
         case "accepted":
-            results = await MessagesService.get_all(to_user_uid=user_uid)
+            results = await MessagesService.get_accepted(user_uid=user_uid)
         case "reply":
             results = await MessagesService.get_replyes(user_uid=user_uid)
         case _:

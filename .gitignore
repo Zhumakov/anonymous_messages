@@ -2,6 +2,8 @@
 venv/
 .git
 .vimspector.json
+.coverage
+htmlcov/
 
 # Python cache files
 __pycache__/

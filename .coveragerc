@@ -1,0 +1,5 @@
+[run]
+omit = 
+    */migration/*
+    */__pycache__/*
+    */.git/*

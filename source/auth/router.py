@@ -20,10 +20,7 @@ async def create_user(user_data: SUserRegistration):
     if existing_username:
         raise exceptions.ExistingUsernameHTTPException
 
-    result = await register_user(user_data)
-
-    if not result:
-        raise exceptions.ServerError
+    await register_user(user_data)
 
 
 @router.get(
@@ -45,14 +42,12 @@ async def switch_password_current_user(
         passwords.current_password, passwords.new_password, str(user.email)
     )
     if not result:
-        raise exceptions.ServerError
+        return exceptions.ServerError
 
 
 @router.post(path="/auth", description="Authenticate user")
 async def login_user(response: Response, user_data: SUserLogin):
     user = await UsersService.authenticate_user(email=user_data.email, password=user_data.password)
-    if not user:
-        raise exceptions.UnauthorizedHTTPException
 
     response, session_token, refresh_token = await set_tokens_in_cookies(response, str(user.id))
 

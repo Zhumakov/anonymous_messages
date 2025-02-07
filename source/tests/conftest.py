@@ -63,7 +63,7 @@ async def auth_async_client():
 async def async_client_with_mocked_auth():
 
     async def mock_get_user():
-        return users[0]
+        return User(**users[0])
 
     FastApi_app.dependency_overrides[get_current_user] = mock_get_user
     async with AsyncClient(transport=ASGITransport(app=FastApi_app), base_url="http://test") as ac:

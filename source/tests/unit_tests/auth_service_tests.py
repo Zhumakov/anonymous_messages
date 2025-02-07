@@ -2,6 +2,7 @@ import pytest
 from fastapi import HTTPException
 from jose import jwt
 from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 
 from source.auth.auth import create_refresh_token, create_session_token
 from source.auth.service import UsersService
@@ -13,19 +14,22 @@ class TestsService:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "username,user_uid,email,password,result",
+        "username,user_uid,email,password,is_error",
         [
-            ("user1", "2", "test@email.com", "password", True),
-            ("user1", "3", "test2@email.com", "password", False),
-            ("user2", "4", "test@email.com", "password", False),
-            ("user3", "2", "test@email.com", "password", False),
+            ("user1", "2", "test@email.com", "password", False),
+            ("user1", "3", "test2@email.com", "password", True),
+            ("user2", "4", "test@email.com", "password", True),
+            ("user3", "2", "test@email.com", "password", True),
         ],
     )
-    async def test_create_user(username, user_uid, email, password, result):
-        query_reslut = await UsersService.insert_into_table(
-            username=username, email=email, hashed_password=password, user_uid=user_uid
-        )
-        assert query_reslut == result
+    async def test_create_user(username, user_uid, email, password, is_error):
+        try:
+            await UsersService.insert_into_table(
+                username=username, email=email, hashed_password=password, user_uid=user_uid
+            )
+            assert not is_error
+        except IntegrityError:
+            assert is_error
 
     @staticmethod
     @pytest.mark.parametrize(

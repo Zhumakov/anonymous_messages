@@ -43,8 +43,8 @@ class SMessageFilterQuery(BaseModel):
     """Using in the FILTER BY query"""
 
     id: Optional[int] = None
-    from_user_uid: Optional[int] = None
-    to_user_uid: Optional[int] = None
+    from_user_uid: Optional[str] = None
+    to_user_uid: Optional[str] = None
 
     model_config = {"strict": True, "extra": "forbid"}
 
@@ -52,17 +52,17 @@ class SMessageFilterQuery(BaseModel):
 class SMessageUpdateQuery(BaseModel):
     """Using in the UPDATE query"""
 
-    from_user_uid: Optional[int] = None
-    to_user_uid: Optional[int] = None
+    from_user_uid: Optional[str] = None
+    to_user_uid: Optional[str] = None
     body: Optional[str] = None
 
 
 class SMessageInsertQuery(BaseModel):
     """Using in the INSERT queryes"""
 
-    from_user_uid: int
-    to_user_uid: int
-    reply_to_message: int
+    from_user_uid: str
+    to_user_uid: str
+    reply_to_message: Optional[int] = None
     body: str
 
     model_config = {"strict": True, "extra": "forbid"}

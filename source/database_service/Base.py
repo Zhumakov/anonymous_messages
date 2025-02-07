@@ -55,7 +55,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             return results.scalars().all()
 
     @classmethod
-    async def insert_into_table(cls, **kwargs) -> bool:
+    async def insert_into_table(cls, **kwargs):
         cls.model_node_scheme.model_validate(kwargs)
 
         async with cls.async_session_maker() as session:
@@ -64,9 +64,8 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
         try:
             await session.execute(query)
             await session.commit()
-            return True
-        except IntegrityError:
-            return False
+        except IntegrityError as exc:
+            raise exc
 
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict) -> bool:

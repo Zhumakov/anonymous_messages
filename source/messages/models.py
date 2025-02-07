@@ -8,8 +8,8 @@ class Message(Base):
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True)
-    from_user_uid = Column(Integer, ForeignKey("users.user_uid"))
-    to_user_uid = Column(Integer, ForeignKey("users.user_uid"))
+    from_user_uid = Column(String, ForeignKey("users.user_uid"))
+    to_user_uid = Column(String, ForeignKey("users.user_uid"))
     reply_to_message = Column(Integer, nullable=True)
     body = Column(String, nullable=False)
 

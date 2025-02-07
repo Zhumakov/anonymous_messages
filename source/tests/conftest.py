@@ -7,6 +7,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import Insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from source.auth.dependenties import get_current_user
 from source.auth.models import User
 from source.database_service.Base import Base
 from source.database_service.database_config import async_engine, session_maker
@@ -56,3 +57,16 @@ async def auth_async_client():
         assert ac.cookies.get("anonym_site_token", "")
         assert ac.cookies.get("anonym_refresh_token", "")
         yield ac
+
+
+@pytest.fixture(scope="function")
+async def async_client_with_mocked_auth():
+
+    async def mock_get_user():
+        return users[0]
+
+    FastApi_app.dependency_overrides[get_current_user] = mock_get_user
+    async with AsyncClient(transport=ASGITransport(app=FastApi_app), base_url="http://test") as ac:
+        yield ac
+
+    FastApi_app.dependency_overrides[mock_get_user] = get_current_user

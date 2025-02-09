@@ -68,7 +68,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             raise exc
 
     @classmethod
-    async def update_node(cls, filter_by: dict, values: dict) -> bool:
+    async def update_node(cls, filter_by: dict, values: dict):
         cls.filter_model_scheme.model_validate(filter_by)
         cls.update_model_scheme.model_validate(values)
         if not filter_by or not values:
@@ -80,9 +80,8 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
             try:
                 await session.execute(query)
                 await session.commit()
-                return True
-            except IntegrityError:
-                return False
+            except IntegrityError as exc:
+                raise exc
 
     @classmethod
     async def delete_by_id(cls, id_node: int) -> None:

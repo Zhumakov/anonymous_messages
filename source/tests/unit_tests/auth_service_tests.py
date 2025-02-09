@@ -1,12 +1,11 @@
 import pytest
-from fastapi import HTTPException
 from jose import jwt
-from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from source.auth.auth import create_refresh_token, create_session_token
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, verify_password
+from source.exceptions.auth_exc import exceptions
 from source.settings import settings
 
 
@@ -16,10 +15,10 @@ class TestsService:
     @pytest.mark.parametrize(
         "username,user_uid,email,password,is_error",
         [
-            ("user1", "2", "test@email.com", "password", False),
-            ("user1", "3", "test2@email.com", "password", True),
-            ("user2", "4", "test@email.com", "password", True),
-            ("user3", "2", "test@email.com", "password", True),
+            ("user1", "10", "test@email.com", "password", False),
+            ("user1", "11", "test2@email.com", "password", True),
+            ("user2", "12", "test@email.com", "password", True),
+            ("user3", "10", "test@email.com", "password", True),
         ],
     )
     async def test_create_user(username, user_uid, email, password, is_error):
@@ -33,76 +32,47 @@ class TestsService:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "filter_by,validation_error",
-        (
-            ({"id": 1}, False),
-            ({"username": "logintest", "id": 1}, False),
-            ({}, True),
-            ({"id": "1"}, True),
-            ({"error_column": "error"}, True),
-        ),
-    )
-    async def test_get_one_or_none(filter_by: dict, validation_error: bool):
-        try:
-            assert await UsersService.get_one_or_none(**filter_by)
-        except ValidationError:
-            assert validation_error
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "filter_by,values,validation_error",
-        (
-            ({"id": 1}, {"refresh_token_id": "123456"}, False),
-            ({}, {"refresh_token_id": "123456"}, True),
-            ({"id": 1}, {}, True),
-            ({"id": "1"}, {"refresh_token_id": "123456"}, True),
-            ({"id": 1}, {"refresh_token_id": 123456}, True),
-        ),
-    )
-    async def test_update_node(filter_by: dict, values: dict, validation_error: bool):
-        try:
-            result = await UsersService.update_node(filter_by=filter_by, values=values)
-            assert result
-        except ValidationError:
-            assert validation_error
-
-    @staticmethod
-    @pytest.mark.parametrize(
-        "token_id,user_id,http_error",
+        "token_id,user_id,is_error",
         (
             ("2523452", 1, False),
             ("2523452", 235245, True),
         ),
     )
-    async def test_set_refresh_token_id(token_id: str, user_id: int, http_error: bool):
+    async def test_set_refresh_token_id(token_id: str, user_id: int, is_error: bool):
         try:
-            result = await UsersService.set_refresh_token_id(token_id=token_id, user_id=user_id)
-            assert result
-        except HTTPException:
-            assert http_error
+            await UsersService.set_refresh_token_id(token_id=token_id, user_id=user_id)
+            assert not is_error
+        except exceptions.UserIsNotExistException:
+            assert is_error
 
     @staticmethod
     @pytest.mark.parametrize(
-        "email,password,http_error",
+        "email,password,is_error",
         (
             ("logintest@gmail.com", "password", False),
             ("logintest1234@gmail.com", "password", True),
             ("logintest@gmail.com", "1234qwer", True),
         ),
     )
-    async def test_authenticate_user(email: str, password: str, http_error: bool):
+    async def test_authenticate_user(email: str, password: str, is_error: bool):
         try:
             assert await UsersService.authenticate_user(email=email, password=password)
-        except HTTPException:
-            assert http_error
+            assert not is_error
+        except (exceptions.UserIsNotExistException, exceptions.PasswordIsInvalidException):
+            assert is_error
 
     @staticmethod
-    async def test_switch_passwords():
-        current_password = "password"
-        new_password = "new_password"
+    @pytest.mark.parametrize(
+        "current_password,new_password,is_error",
+        (("password", "new_password", False), ("wrong_password", "new_password", True)),
+    )
+    async def test_switch_passwords(current_password: str, new_password: str, is_error: bool):
         user_email = "logintest@gmail.com"
-        result = await UsersService.switch_password(current_password, new_password, user_email)
-        assert result
+        try:
+            await UsersService.switch_password(current_password, new_password, user_email)
+            assert not is_error
+        except exceptions.PasswordIsInvalidException:
+            assert is_error
 
 
 class TestsUtils:

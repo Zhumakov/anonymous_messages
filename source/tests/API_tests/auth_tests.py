@@ -1,6 +1,7 @@
 import pytest
 from fastapi import HTTPException, status
 from httpx import AsyncClient, Response
+from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
 
 from source.auth.service import UsersService
 
@@ -30,6 +31,7 @@ async def test_registration(
     [
         ("logintest@gmail.com", "password", status.HTTP_200_OK),
         ("1234@gmail.com", "password", status.HTTP_401_UNAUTHORIZED),
+        ("logintest@gmail.com", "wrong_password", status.HTTP_422_UNPROCESSABLE_ENTITY),
     ],
 )
 async def test_login(email: str, password, status_code, async_client: AsyncClient):
@@ -81,8 +83,7 @@ async def test_switch_passwords(async_client: AsyncClient):
     )
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
-    try:
-        await UsersService.authenticate_user(email="email@gmail.com", password="password")
-        assert False  # Fail
-    except HTTPException as exc:
-        assert exc.status_code == status.HTTP_401_UNAUTHORIZED
+    response: Response = await async_client.post(
+        "/users/auth", json={"email": "email@gmail.com", "password": "password"}
+    )
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY

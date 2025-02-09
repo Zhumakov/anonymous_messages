@@ -1,5 +1,3 @@
-from typing import Literal
-
 from fastapi import APIRouter, Depends, status
 
 from source.auth.dependenties import get_current_user

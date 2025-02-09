@@ -2,21 +2,31 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import Response
+from sqlalchemy.exc import IntegrityError
 
 from source.auth.schemas import SUserRegistration
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, jwt_encode
+from source.exceptions.auth_exc import exceptions
 
 
 async def register_user(user_data: SUserRegistration):
+    if await UsersService.get_one_or_none(email=user_data.email):
+        raise exceptions.ExistingUserException("User with this email alredy exist")
+    if await UsersService.get_one_or_none(username=user_data.username):
+        raise exceptions.ExistingUsernameException("User with this username alredy exist")
+
     hashed_password = hash_password(user_data.password)
     user_uid = str(uuid.uuid4())
-    await UsersService.insert_into_table(
-        username=user_data.username,
-        email=user_data.email,
-        hashed_password=hashed_password,
-        user_uid=user_uid,
-    )
+    try:
+        await UsersService.insert_into_table(
+            username=user_data.username,
+            email=user_data.email,
+            hashed_password=hashed_password,
+            user_uid=user_uid,
+        )
+    except IntegrityError:
+        raise exceptions.UserCreateException("Failed to create a user")
 
 
 async def create_refresh_token(user_id: str) -> str:

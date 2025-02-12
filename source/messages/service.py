@@ -18,7 +18,7 @@ class MessagesService(
     model_node_scheme = SMessageInsertQuery
 
     @classmethod
-    async def get_replyes(cls, user_uid) -> Sequence[Message]:
+    async def get_replyes(cls, user_uid: str) -> Sequence[Message]:
         async with cls.async_session_maker() as session:
             session: AsyncSession
             query = Select(cls.model).filter(
@@ -28,7 +28,7 @@ class MessagesService(
             return results.scalars().all()
 
     @classmethod
-    async def get_accepted(cls, user_uid) -> Sequence[Message]:
+    async def get_accepted(cls, user_uid: str) -> Sequence[Message]:
         async with cls.async_session_maker() as session:
             session: AsyncSession
             query = Select(cls.model).filter(

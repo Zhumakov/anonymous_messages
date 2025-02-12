@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анонимный сайт</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/colors.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css') }}">
+    <script src="{{ url_for('static', path='/js/script.js') }}"></script>
+  </head>
+  <body>
+    <header>
+      <div class="top-bar">
+        <h1>Анонимный сайт</h1>
+      </div>
+    </header>
+
+    <main>
+      <div class="profile-container">
+        <div class="profile-avatar">
+          <img src="{% if user.avatar_url %}{{ url_for('static', path='/avatars/' +
+          user.avatar_name) }}{% else %}{{ url_for('static', path='/avatars/default.jpeg') }}{% endif %}" alt="Аватар">
+        </div>
+        <div class="profile-info">
+          <h2>User UID: {{ user.user_uid }}</h2>
+          <p><b>О себе:</b> {{ user.about_me }}</p>
+        </div>
+      </div>
+
+      <div class="message-navigation">
+        <button data-tab="accepted" class="tab-button">Принятые</button>
+        <button data-tab="reply" class="tab-button">Ответы</button>
+        <button data-tab="sended" class="tab-button">Отправленные</button>
+      </div>
+
+      <div id="message-container" class="message-list">
+      </div>
+    </main>
+
+    <footer>
+      <div class="bottom-bar">
+        <p>&copy; 2023 Мой анонимный сайт. Все права защищены.</p>
+        <p>Контакты: example@example.com</p>
+      </div>
+    </footer>
+  </body>
+</html>

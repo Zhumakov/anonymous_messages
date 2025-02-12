@@ -43,7 +43,7 @@ async def reply_on_message(
     message_id: int, message_data: SReplyToMessageRequest, user: User = Depends(get_current_user)
 ):
     primary_message = await verify_and_get_message(
-        from_user_uid=str(user.user_uid), reply_to_message=message_id
+        user_uid=str(user.user_uid), reply_to_message=message_id
     )
     await send_message_and_notification(
         to_user_uid=str(primary_message.from_user_uid),

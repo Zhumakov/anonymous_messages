@@ -1,0 +1,9 @@
+:root {
+    --background-color: #301934;          /* Тёмно-фиолетовый фон */
+    --text-color: #e0e0e0;                /* Светлый текст */
+    --button-color: #BA55D3;                /* Фиолетовый для кнопок */
+    --header-footer-color: #4B0082;       /* Более тёмный фиолетовый для header/footer */
+    --border-color: #663399;              /* Разделитель и рамки */
+    --message-background-color: #483D8B;   /* Тёмно-фиолетовый для сообщений */
+    --botton-link-color: #9370DB;          /* Яркий фиолетовый для кнопок */
+}

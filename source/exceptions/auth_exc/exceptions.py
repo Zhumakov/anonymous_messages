@@ -3,6 +3,9 @@ class AuthException(Exception):
         super().__init__(*args)
         self.detail = detail
 
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}({self.detail})"
+
 
 class UserCreateException(AuthException):
     pass

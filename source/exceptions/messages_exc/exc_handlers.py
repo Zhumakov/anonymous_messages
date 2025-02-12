@@ -16,3 +16,12 @@ async def message_create_exc_handler(request: Request, exc: exceptions.MessageCr
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"detail": "Couldn't send message"},
     )
+
+
+async def not_sent_message_to_yourself_exc_handler(
+    request: Request, exc: exceptions.NotSentMessageToMyselfException
+):
+    return JSONResponse(
+        status_code=status.HTTP_403_FORBIDDEN,
+        content={"detail": "You can't send the message yourself"},
+    )

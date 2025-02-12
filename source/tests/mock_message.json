@@ -2,6 +2,7 @@
   {
     "from_user_uid": "1",
     "to_user_uid": "2",
+    "reply_to_message": null,
     "body": "message 1"
   },
   {
@@ -13,6 +14,7 @@
   {
     "from_user_uid": "2",
     "to_user_uid": "1",
+    "reply_to_message": null,
     "body": "message 3"
   }
 ]

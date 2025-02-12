@@ -39,3 +39,7 @@ def bind_messages_exc_handlers_with_app(app: FastAPI):
     app.add_exception_handler(
         message_excs.MessageVerifyException, messages_handlers.message_verify_exc_handler
     )
+    app.add_exception_handler(
+        message_excs.NotSentMessageToMyselfException,
+        messages_handlers.not_sent_message_to_yourself_exc_handler,
+    )

@@ -1,8 +1,8 @@
-FROM python:3.12 slim-buster
+FROM python:3.12
 
 WORKDIR source/
 
-COPY ./requirements.txt
+COPY requirements.txt
 
 RUN pip install -r requirements.txt
 

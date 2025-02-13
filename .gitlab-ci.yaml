@@ -1,0 +1,23 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build-job:
+  stage: build
+  script:
+    - "docker build  . -t anonym-messages"
+
+
+test-job:
+  stage: test
+  script:
+    - "docker-compose -f ci-cd/tests/docker-compose.yaml up -d"
+  after_script:
+    - "docker-compose -f ci-cd/tests/docker-compose.yaml down"
+
+
+deploy-job:
+  stage: deploy
+  script:
+    - "docker-compose -f ci-cd/deploy/docker-compose.yaml"

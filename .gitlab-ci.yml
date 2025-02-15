@@ -14,9 +14,9 @@ build-job:
 test-job:
   stage: test
   script:
-    - "docker-compose -f ci-cd/tests/docker-compose.yaml up -d"
+    - "docker-compose -f ci_cd/tests/docker-compose.yaml up -d"
   after_script:
-    - "docker-compose -f ci-cd/tests/docker-compose.yaml down"
+    - "docker-compose -f ci_cd/tests/docker-compose.yaml down"
 
 
 check-coverage-job:
@@ -30,4 +30,4 @@ check-coverage-job:
 deploy-job:
   stage: deploy
   script:
-    - "docker-compose -f ci-cd/deploy/docker-compose.yaml"
+    - "docker-compose -f ci_cd/deploy/docker-compose.yaml"

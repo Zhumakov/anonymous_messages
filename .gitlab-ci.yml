@@ -6,8 +6,8 @@ stages:
 build-job:
   stage: build
   script:
-    - "echo "$DOT_TEST_ENV_file" > ci-cd/tests/.env"
-    - "echo "$DOT_PROD_ENV_file" > ci-cd/deploy/.env"
+    - "echo "$DOT_TEST_ENV_file" > ci_cd/tests/.env"
+    - "echo "$DOT_PROD_ENV_file" > ci_cd/deploy/.env"
     - "docker build  . -t anonym-messages"
 
 

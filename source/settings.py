@@ -11,8 +11,6 @@ class Settings(BaseSettings):
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     MODE: Literal["DEV", "TEST", "PROD"]
 
-    API_ADRESS: str
-
     DB_HOST: str
     DB_PORT: int
     DB_USER: str

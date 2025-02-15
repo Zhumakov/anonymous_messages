@@ -7,7 +7,7 @@ services:
     command: gunicorn main:app --workers 1 --port 8000  --worker-class uvicorn.workers.UvicornWorker
     env_file:
       - .env
-    depends:
+    depends_on:
       - db
     restart: always
 

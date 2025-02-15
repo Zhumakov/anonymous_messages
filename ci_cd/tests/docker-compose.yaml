@@ -12,7 +12,7 @@ services:
       - .env
     volumes:
       - coverage:/coverage
-    depends:
+    depends_on:
       - db
 
   db:

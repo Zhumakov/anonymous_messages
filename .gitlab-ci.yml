@@ -6,8 +6,8 @@ stages:
 build-job:
   stage: build
   script:
-    - echo "$DOT_TEST_ENV_file" > ci_cd/tests/.env
-    - echo "$DOT_PROD_ENV_file" > ci_cd/deploy/.env
+    - echo "$DOT_TEST_ENV_FILE" > ci_cd/tests/.env
+    - echo "$DOT_PROD_ENV_FILE" > ci_cd/deploy/.env
     - "docker build  . -t anonym-messages"
 
 
@@ -24,7 +24,7 @@ check-coverage-job:
   dependencies:
     - test-job
   script:
-    - "docker run -rm -v /coverage:/coverage anonym-messages python ci_cd/test/check_coverage.py coverage/coverage.json 80"
+    - "docker run --rm -v /coverage:/coverage anonym-messages python ci_cd/test/check_coverage.py coverage/coverage.json 80"
 
 
 deploy-job:

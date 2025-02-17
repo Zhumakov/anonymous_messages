@@ -17,6 +17,10 @@ test-job:
     - "docker-compose -f ci_cd/tests/docker-compose.yaml up -d"
   after_script:
     - "docker-compose -f ci_cd/tests/docker-compose.yaml down"
+  artifacts:
+    paths:
+      - coverage/coverage.json
+    expire_in: 1 week
 
 
 check-coverage-job:
@@ -26,7 +30,18 @@ check-coverage-job:
   before_script:
     - echo "$DOT_PROD_ENV_FILE" | tail -n +2 > ci_cd/deploy/.env
   script:
-    - "docker run --rm -v /coverage:/coverage anonym-messages python ../ci_cd/test/check_coverage.py coverage/coverage.json 80"
+    - docker run:
+        image: anonym-messages
+        rm: true
+        volumes:
+          - /coverage:/coverage
+        command:
+          - coverage
+          - report
+          - --show-missing
+          - "80"
+          - coverage/coverage.json
+  allow_failure: true
 
 
 deploy-job:

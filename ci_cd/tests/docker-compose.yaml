@@ -7,7 +7,9 @@ services:
   app:
     build: .
     image: anonym-messages
-    command: sh -c "coverage run -m pytest -v && coverage json -o coverage/coverage.json"
+    command: |
+      coverage run -m pytest -v && \
+      coverage json -o coverage/coverage.json"
     env_file:
       - .env
     volumes:

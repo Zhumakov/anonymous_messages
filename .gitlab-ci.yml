@@ -40,4 +40,4 @@ deploy-job:
     - echo "$DOT_TEST_ENV_FILE" > ci_cd/tests/.env
     - echo "$DOT_PROD_ENV_FILE" > ci_cd/deploy/.env
   script:
-    - "docker-compose -f ci_cd/deploy/docker-compose.yaml"
+    - "docker-compose -f ci_cd/deploy/docker-compose.yaml up -d"

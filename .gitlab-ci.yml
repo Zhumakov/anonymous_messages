@@ -30,17 +30,7 @@ check-coverage-job:
   before_script:
     - echo "$DOT_PROD_ENV_FILE" | tail -n +2 > ci_cd/deploy/.env
   script:
-    - docker run:
-        image: anonym-messages
-        rm: true
-        volumes:
-          - /coverage:/coverage
-        command:
-          - coverage
-          - report
-          - --show-missing
-          - "80"
-          - coverage/coverage.json
+    - docker run --rm -v /coverage:/coverage coverage report --show-missing 80 coverage/coverage.json
   allow_failure: true
 
 

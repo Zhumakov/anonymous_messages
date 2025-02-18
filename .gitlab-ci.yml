@@ -14,7 +14,7 @@ test-job:
   before_script:
     - echo "$DOT_TEST_ENV_FILE" | tail -n +2 > ci_cd/tests/.env
   script:
-    - "docker-compose -f ci_cd/tests/docker-compose.yaml up -d"
+    - "docker-compose -f ci_cd/tests/docker-compose.yaml up"
   after_script:
     - "docker-compose -f ci_cd/tests/docker-compose.yaml down"
   artifacts:

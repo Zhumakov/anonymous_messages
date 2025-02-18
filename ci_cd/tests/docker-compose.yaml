@@ -9,7 +9,7 @@ services:
     image: anonym-messages
     command: |
       coverage run -m pytest -v && \
-      coverage json -o coverage/coverage.json"
+      coverage json -o coverage/coverage.json
     env_file:
       - .env
     volumes:

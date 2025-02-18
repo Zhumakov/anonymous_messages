@@ -4,12 +4,12 @@ services:
   app:
     build: .
     image: anonym-messages
-        command: |
-          alembic upgrade head && \
-          gunicorn main:app \
-            --workers 1 \
-            --port 8000 \
-            --worker-class uvicorn.workers.UvicornWorker
+    command: |
+      alembic upgrade head && \
+      gunicorn main:app \
+        --workers 1 \
+        --port 8000 \
+        --worker-class uvicorn.workers.UvicornWorker
     env_file:
       - .env
     ports:

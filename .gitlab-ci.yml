@@ -13,6 +13,7 @@ test-job:
   stage: test
   before_script:
     - echo "$DOT_TEST_ENV_FILE" | tail -n +2 > ci_cd/tests/.env
+    - source ci_cd/tests/.env
   script: |
     docker-compose -f ci_cd/tests/docker-compose.yaml up \
     --exit-code-from app \
@@ -43,5 +44,6 @@ deploy-job:
   stage: deploy
   before_script:
     - echo "$DOT_PROD_ENV_FILE" | tail -n +2 > ci_cd/deploy/.env
+    - source ci_cd/deploy/.env
   script:
     - "docker-compose -f ci_cd/deploy/docker-compose.yaml up -d"

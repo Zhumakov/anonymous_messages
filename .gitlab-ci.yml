@@ -13,12 +13,11 @@ test-job:
   stage: test
   before_script:
     - echo "$DOT_TEST_ENV_FILE" | tail -n +2 > ci_cd/tests/.env
-  script:
-    - "docker-compose -f ci_cd/tests/docker-compose.yaml up -d"
-    - "docker exec coverage run -m pytest -v"
-    - "docker exec coverage json -o coverage/coverage.json"
-  after_script:
-    - "docker-compose -f ci_cd/tests/docker-compose.yaml down"
+  script: |
+    docker-compose -f ci_cd/tests/docker-compose.yaml up \
+    --exit-code-from app \
+    --remove-orphans \
+    --abort-on-container-exit
   artifacts:
     paths:
       - coverage/coverage.json
@@ -31,11 +30,12 @@ check-coverage-job:
     - test-job
   script:
     - |
-      docker run --rm \
+      docker run \
+        --rm \
         -v /coverage:/coverage \
-      anonym-messages coverage report \
-        --fail-under=80 \
-        --data-file=coverage/coverage.json
+        anonym-messages coverage report \
+          --fail-under=80 \
+          --data-file=coverage/coverage.json
   allow_failure: true
 
 

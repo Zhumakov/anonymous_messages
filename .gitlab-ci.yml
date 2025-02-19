@@ -12,6 +12,7 @@ build-job:
 test-job:
   stage: test
   before_script:
+    - echo $DOT_TEST_ENV_FILE
     - echo "$DOT_TEST_ENV_FILE" | tail -n +2 > ci_cd/tests/.env
     - source ci_cd/tests/.env
   script: |

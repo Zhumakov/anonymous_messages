@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Функция для загрузки сообщений из API
   function loadMessages(tab) {
     // Определяем URL API в зависимости от выбранной вкладки
-    let apiUrl = `/message/${tab}`; // Пример: /api/messages/accepted, /api/messages/replies, /api/messages/sent
+    let apiUrl = `/api/message/${tab}`; 
 
     // Показываем индикатор загрузки
     messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Пример отображения данных сообщения (замените на свои поля)
         messageElement.innerHTML = `
           <div class="message-header">
-            <span class="sender">${message.sender || 'Неизвестный отправитель'}</span>
+            <span class="sender">Неизвестный отправитель</span>
             <span class="date">${message.date || 'Неизвестная дата'}</span>
           </div>
           <div class="message-body">

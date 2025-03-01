@@ -1,5 +1,6 @@
 """Этот модуль создаёт класс с настройками для проекта."""
 
+import os
 from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
     SMTP_USER: str
     SMTP_PASS: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=f"{os.getenv('ENV_PATH')}")
 
 
 settings = Settings()

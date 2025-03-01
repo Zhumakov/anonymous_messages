@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/colors.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='/css/register_style.css') }}">
+  <script src="{{ url_for('static', path='/js/register_script.js') }}"></script>
+</head>
+<body>
+  <header>
+      <h1>Регистрация</h1>
+  </header>
+
+  <main>
+    <section class="form-container">
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="username">Имя пользователя:</label>
+          <input type="text" id="username" name="username" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Пароль:</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="form-group">
+          <label for="repeat_password">Подтвердите пароль:</label>
+          <input type="password" id="confirm_password" name="confirm_password" required>
+          <span id="password_error" class="error-message"></span>
+        </div>
+
+        <button type="submit" class="button">Зарегистрироваться</button>
+
+        <div class="message">
+          Уже зарегистрированы? <a href="#" class="link">Войти</a>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

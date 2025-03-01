@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, staticfiles
+from fastapi import FastAPI, staticfiles
 
 from source.auth.router import router as auth_router
 from source.exceptions import config_app
@@ -20,8 +20,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(router=auth_router)
-app.include_router(router=messages_router)
+app.include_router(router=auth_router, prefix="/api")
+app.include_router(router=messages_router, prefix="/api")
 app.include_router(router=front_router)
 
 config_app.bind_auth_exc_handlers_with_app(app)

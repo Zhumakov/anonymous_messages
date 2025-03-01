@@ -26,6 +26,10 @@ async def main_page(request: Request):
             "request": request,
             "user": users[0],
             "messages": messages,
-            "message_type": "recived",
         },
     )
+
+
+@router.get("/register", description="Register page", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse("register.html", context={"request": request})

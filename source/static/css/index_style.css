@@ -85,7 +85,7 @@ main {
 }
 
 .tab-button:hover {
-    background-color: var(--active-button-color);;
+    background-color: var(--active-button-color);
 }
 
 .tab-button:active {

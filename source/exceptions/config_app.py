@@ -8,6 +8,7 @@ from source.exceptions.messages_exc import exceptions as message_excs
 
 def bind_auth_exc_handlers_with_app(app: FastAPI):
     app.add_exception_handler(auth_excs.ExistingUserException, auth_handlers.exist_user_exc_handler)
+    app.add_exception_handler(auth_excs.IsNotAuthorized, auth_handlers.is_not_authorized)
     app.add_exception_handler(
         auth_excs.ExistingUsernameException, auth_handlers.exist_username_exc_handler
     )

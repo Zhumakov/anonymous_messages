@@ -6,8 +6,14 @@ from source.exceptions.auth_exc import exceptions
 
 async def user_create_exc_handler(request: Request, exc: exceptions.UserCreateException):
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": "Failed to register the user"},
+    )
+
+
+async def is_not_authorized(request: Request, exc: exceptions.IsNotAuthorized):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED, content={"detail": "User is not authorized"}
     )
 
 

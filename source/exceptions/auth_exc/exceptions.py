@@ -7,6 +7,10 @@ class AuthException(Exception):
         return f"{self.__class__.__name__}({self.detail})"
 
 
+class IsNotAuthorized(AuthException):
+    pass
+
+
 class UserCreateException(AuthException):
     pass
 

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import Cookie
 from jose import JWTError, jwt
 
@@ -8,8 +10,11 @@ from source.settings import settings
 
 
 async def get_current_user(
-    anonym_site_token: str = Cookie(description="Token for autorize"),
+    anonym_site_token: Optional[str] = Cookie(None, description="Token for autorize"),
 ) -> User:
+    if not anonym_site_token:
+        raise exceptions.IsNotAuthorized("Session token is not exist")
+
     try:
         payload = jwt.decode(
             anonym_site_token, key=settings.SECRET_KEY, algorithms=settings.ALGORITHM

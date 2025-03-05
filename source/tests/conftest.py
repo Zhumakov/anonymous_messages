@@ -53,7 +53,8 @@ async def init_database():
 @pytest.fixture(scope="function")
 async def auth_async_client():
     async with AsyncClient(transport=ASGITransport(app=FastApi_app), base_url="http://test") as ac:
-        await ac.post("/users/auth", json={"email": "logintest@gmail.com", "password": "password"})
+        login_url = FastApi_app.url_path_for("login_user")
+        await ac.post(login_url, json={"email": "logintest@gmail.com", "password": "password"})
         assert ac.cookies.get("anonym_site_token", "")
         assert ac.cookies.get("anonym_refresh_token", "")
         yield ac
@@ -65,8 +66,7 @@ async def async_client_with_mocked_auth():
     async def mock_get_user():
         return User(**users[0])
 
-    FastApi_app.dependency_overrides[get_current_user] = mock_get_user
     async with AsyncClient(transport=ASGITransport(app=FastApi_app), base_url="http://test") as ac:
+        FastApi_app.dependency_overrides[get_current_user] = mock_get_user
         yield ac
-
-    FastApi_app.dependency_overrides[mock_get_user] = get_current_user
+        FastApi_app.dependency_overrides[mock_get_user] = get_current_user

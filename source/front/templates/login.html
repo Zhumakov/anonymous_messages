@@ -6,20 +6,16 @@
   <title>Регистрация</title>
   <link rel="stylesheet" href="{{ url_for('static', path='/css/colors.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', path='/css/register_style.css') }}">
-  <script src="{{ url_for('static', path='/js/register_script.js') }}"></script>
+  <script src="{{ url_for('static', path='/js/login_script.js') }}"></script>
 </head>
 <body>
   <header>
-      <h1>Регистрация</h1>
+    <h1>Вход</h1>
   </header>
 
   <main>
     <section class="form-container">
       <form id="registerForm">
-        <div class="form-group">
-          <label for="username">Имя пользователя:</label>
-          <input type="text" id="username" name="username" required>
-        </div>
 
         <div class="form-group">
           <label for="email">Email:</label>
@@ -31,16 +27,10 @@
           <input type="password" id="password" name="password" required>
         </div>
 
-        <div class="form-group">
-          <label for="repeat_password">Подтвердите пароль:</label>
-          <input type="password" id="confirm_password" name="confirm_password" required>
-          <span id="password_error" class="error-message"></span>
-        </div>
-
-        <button type="submit" class="button">Зарегистрироваться</button>
+        <button type="submit" class="button">Войти</button>
 
         <div class="message">
-          Уже зарегистрированы? <a href="/login" class="link">Войти</a>
+          Еще не зарегистрированы? <a href="/register" class="link">Зарегистрироваться</a>
         </div>
       </form>
     </section>

@@ -23,7 +23,7 @@
       </div>
       <div class="profile-info">
         <h2>User UID: {{ user.user_uid }}</h2>
-        <p><b>О себе:</b> {{ user.about_me }}</p>
+        <p><b>О себе: </b>{% if user.about_me %}{{ user.about_me  }}{% else %}{{ "Ничего"  }}{% endif %}</p>
       </div>
     </div>
 

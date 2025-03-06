@@ -1,31 +1,27 @@
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+
+from source.auth.dependenties import get_current_user
+from source.exceptions.auth_exc import exceptions
 
 router = APIRouter(prefix="", tags=["Frontend"])
 
 templates = Jinja2Templates(directory="source/front/templates")
 
-# Пример данных для передачи в шаблон
-users = [
-    {"user_uid": "user123", "about_me": "Люблю котиков!"},
-    {"user_uid": "user456", "about_me": "Привет, мир!"},
-]
-
-messages = [
-    {"sender": "user123", "date": "2023-10-27", "preview": "Привет!"},
-    {"sender": "user456", "date": "2023-10-28", "preview": "Как дела?"},
-]
-
 
 @router.get("/", description="Main page", response_class=HTMLResponse)
 async def main_page(request: Request):
+    try:
+        user = await get_current_user(request.cookies.get("anonym_site_token"))
+    except exceptions.IsNotAuthorized:
+        return RedirectResponse("/register")
+
     return templates.TemplateResponse(
         "index.html",
         context={
             "request": request,
-            "user": users[0],
-            "messages": messages,
+            "user": user,
         },
     )
 
@@ -33,3 +29,8 @@ async def main_page(request: Request):
 @router.get("/register", description="Register page", response_class=HTMLResponse)
 async def register_page(request: Request):
     return templates.TemplateResponse("register.html", context={"request": request})
+
+
+@router.get("/login", description="Login page", response_class=HTMLResponse)
+async def login_page(request: Request):
+    return templates.TemplateResponse("login.html", context={"request": request})

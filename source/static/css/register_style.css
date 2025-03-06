@@ -89,3 +89,12 @@ input[type="password"]:focus {
 .link:hover {
     text-decoration: underline;
 }
+
+.error {
+    color: red;
+    display: none;
+    border: 1px solid red;
+    border-radius: 2px;
+    padding: 5px;
+    margin: 5px 0px;
+}

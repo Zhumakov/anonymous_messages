@@ -39,7 +39,7 @@ async def user_is_not_exist_exc_handler(request: Request, exc: exceptions.UserIs
 
 async def pass_change_exc_handler(request: Request, exc: exceptions.PasswordChangeException):
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_INTERNAL_SERVER_ERROR,
         content={"detail": "Failed to change password"},
     )
 

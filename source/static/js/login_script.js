@@ -1,9 +1,20 @@
+function displayError(message) {
+    const errorElement = document.getElementById('error_block');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    } else {
+        alert(message);
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registerForm');
 
+
     form.addEventListener('submit', function(event) {
         event.preventDefault(); // Предотвращаем отправку формы обычным способом
-
 
         // Собираем данные формы в объект
         const formData = {
@@ -20,17 +31,41 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(response => {
             if (response.ok) {
-                // Успешная авторизация, перенаправляем на главную страницу
+                // Успешный вход, перенаправляем на главную страницу
                 window.location.href = '/';
             } else {
-                response.text().then(text => {
-                    console.error("Ошибка:", text);
-                });
+                console.error('Ошибка при входе', response.status);
+                switch (response.status) {
+                    case 400:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Не удалось войти');
+                        });
+                        break;
+                    case 401:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Неверная электронная почта или пароль');
+                        });
+                        break;
+                    case 422:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Неверная электронная почта или пароль');
+                        });
+                        break;
+                    default:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Произошла ошибка');
+                        });
+                        break;
+                }
             }
         })
         .catch(error => {
             console.error('Ошибка сети:', error);
-            // Обработать ошибку сети и показать сообщение пользователю
+            displayError('Ошибка сети: проверьте подключение');
         });
     });
 });

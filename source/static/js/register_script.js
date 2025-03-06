@@ -1,18 +1,27 @@
+function displayError(message) {
+    const errorElement = document.getElementById('error_block');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    } else {
+        alert(message);
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registerForm');
     const passwordField = document.getElementById('password');
     const confirmPasswordField = document.getElementById('confirm_password');
-    const passwordError = document.getElementById('password_error');
+
 
     form.addEventListener('submit', function(event) {
         event.preventDefault(); // Предотвращаем отправку формы обычным способом
 
         if (passwordField.value !== confirmPasswordField.value) {
-            passwordError.textContent = 'Пароли не совпадают';
+            displayError('Пароли не совпадают')
             confirmPasswordField.focus();
             return;
-        } else {
-            passwordError.textContent = '';
         }
 
         // Собираем данные формы в объект
@@ -34,18 +43,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Успешная регистрация, перенаправляем на главную страницу
                 window.location.href = '/';
             } else {
-                // Ошибка при регистрации
-                console.error('Ошибка при регистрации:', response.status);
-                // Можно получить текст ошибки из response.text() или response.json() и показать пользователю
-                response.text().then(text => {
-                    console.error("Ошибка:", text);
-                    // Добавь код для отображения ошибки на странице
-                });
+                console.error('Ошибка при регистрации', response.status);
+                switch (response.status) {
+                    case 400:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Не удалось зарегестрировать пользователя');
+                        });
+                        break;
+                    case 409:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Пользователь с таким именем или электронной почтой уже существует');
+                        });
+                        break;
+                    case 422:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Данные не допустимы');
+                        });
+                        break;
+                    default:
+                        response.text().then(errorMessage => {
+                            console.error(errorMessage);
+                            displayError('Произошла ошибка');
+                        });
+                        break;
+                }
             }
         })
         .catch(error => {
             console.error('Ошибка сети:', error);
-            // Обработать ошибку сети и показать сообщение пользователю
+            displayError('Ошибка сети: проверьте подключение');
         });
     });
 });

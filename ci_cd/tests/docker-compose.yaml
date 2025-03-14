@@ -1,15 +1,11 @@
-version: "3.9"
-
-volumes:
-  coverage:
-
+---
 services:
   app:
-    build: .
+    build: ../../
     image: anonym-messages
-    command: |
-      coverage run -m pytest -v && \
-      coverage json -o coverage/coverage.json
+    environment:
+      ENV_PATH: ci_cd/tests/.env
+    command: ci_cd/tests/command.sh
     env_file:
       - .env
     volumes:
@@ -28,8 +24,10 @@ services:
       POSTGRES_DB: ${TEST_DB_NAME}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${TEST_DB_USER} -d ${TEST_DB_NAME}"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 2s
       retries: 5
     restart: unless-stopped
 
+volumes:
+  coverage:

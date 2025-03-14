@@ -1,24 +1,4 @@
-version: "3.9"
-
 services:
-  app:
-    build: .
-    image: anonym-messages
-    command: |
-      alembic upgrade head && \
-      gunicorn main:app \
-        --workers 1 \
-        --port 8000 \
-        --worker-class uvicorn.workers.UvicornWorker
-    env_file:
-      - .env
-    ports:
-      - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: always
-
   db:
     image: postgres:16
     volumes:
@@ -29,12 +9,47 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s 
+      timeout: 2s
       retries: 5
     restart: unless-stopped
+    networks:
+      - main_network
+
+  app:
+    build: ../../
+    image: anonym-messages
+    environment:
+      ENV_PATH: ci_cd/deploy/.env
+    command: ci_cd/deploy/command.sh
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped 
+    networks:
+      - main_network
+
+#   nginx:
+#     image: nginx:alpine
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - './nginx.conf:/etc/nginx/nginx.conf'
+#     depends_on:
+#       - app
+#     networks:
+#       - main_network
+
+networks:
+  main_network:
+    driver: bridge
 
 volumes:
   db_data:

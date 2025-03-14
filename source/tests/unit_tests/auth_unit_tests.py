@@ -1,8 +1,11 @@
+from typing import Optional
+
 import pytest
+from fastapi import HTTPException
 from jose import jwt
 from sqlalchemy.exc import IntegrityError
 
-from source.auth.auth import create_refresh_token, create_session_token
+from source.auth.core import create_refresh_token, create_session_token
 from source.auth.service import UsersService
 from source.auth.utils import hash_password, verify_password
 from source.exceptions.auth_exc import exceptions
@@ -24,7 +27,10 @@ class TestsService:
     async def test_create_user(username, user_uid, email, password, is_error):
         try:
             await UsersService.insert_into_table(
-                username=username, email=email, hashed_password=password, user_uid=user_uid
+                username=username,
+                email=email,
+                hashed_password=password,
+                user_uid=user_uid,
             )
             assert not is_error
         except IntegrityError:
@@ -32,47 +38,53 @@ class TestsService:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "token_id,user_id,is_error",
+        "token_id,user_id,error",
         (
-            ("2523452", 1, False),
-            ("2523452", 235245, True),
+            ("2523452", 1, None),
+            ("2523452", 235245, exceptions.RefreshTokenCreateFailed),
         ),
     )
-    async def test_set_refresh_token_id(token_id: str, user_id: int, is_error: bool):
+    async def test_set_refresh_token_id(token_id: str, user_id: int, error: Optional[HTTPException]):
         try:
             await UsersService.set_refresh_token_id(token_id=token_id, user_id=user_id)
-            assert not is_error
-        except exceptions.UserIsNotExistException:
-            assert is_error
+            assert not error
+        except HTTPException as exc:
+            assert exc == error
 
     @staticmethod
     @pytest.mark.parametrize(
-        "email,password,is_error",
+        "email,password,error",
         (
-            ("logintest@gmail.com", "password", False),
-            ("logintest1234@gmail.com", "password", True),
-            ("logintest@gmail.com", "1234qwer", True),
+            ("logintest@gmail.com", "password", None),
+            ("logintest1234@gmail.com", "password", exceptions.AuthFailed),
+            ("logintest@gmail.com", "1234qwer", exceptions.AuthFailed),
         ),
     )
-    async def test_authenticate_user(email: str, password: str, is_error: bool):
+    async def test_authenticate_user(
+        email: str, password: str, error: Optional[HTTPException]
+    ):
         try:
             assert await UsersService.authenticate_user(email=email, password=password)
-            assert not is_error
-        except (exceptions.UserIsNotExistException, exceptions.PasswordIsInvalidException):
-            assert is_error
+            assert not error
+        except HTTPException as exc:
+            assert exc == error
 
     @staticmethod
     @pytest.mark.parametrize(
-        "current_password,new_password,is_error",
-        (("password", "new_password", False), ("wrong_password", "new_password", True)),
+        "current_password,new_password,error",
+        (("password", "new_password", None), ("wrong_password", "new_password", exceptions.AuthFailed)),
     )
-    async def test_switch_passwords(current_password: str, new_password: str, is_error: bool):
+    async def test_switch_passwords(
+        current_password: str, new_password: str, error: Optional[HTTPException]
+    ):
         user_email = "logintest@gmail.com"
         try:
-            await UsersService.switch_password(current_password, new_password, user_email)
-            assert not is_error
-        except exceptions.PasswordIsInvalidException:
-            assert is_error
+            await UsersService.switch_password(
+                current_password, new_password, user_email
+            )
+            assert not error
+        except HTTPException as exc:
+            assert exc == error
 
 
 class TestsUtils:
@@ -97,9 +109,9 @@ class TestsAuth:
         user_id = "1"
         session_token = await create_session_token(user_id)
 
-        user_id_from_token = jwt.decode(session_token, settings.SECRET_KEY, settings.ALGORITHM).get(
-            "sub"
-        )
+        user_id_from_token = jwt.decode(
+            session_token, settings.SECRET_KEY, settings.ALGORITHM
+        ).get("sub")
         assert user_id == user_id_from_token
 
     @staticmethod

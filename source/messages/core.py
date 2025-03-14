@@ -26,15 +26,18 @@ async def verify_and_get_message(user_uid: str, reply_to_message: int) -> Messag
         or bool(primary_message.reply_to_message)
         or user_uid != primary_message.to_user_uid
     ):
-        raise exceptions.MessageVerifyException("User has not accepted this message")
+        raise exceptions.UserNotAcceptedThisMessage
     return primary_message
 
 
 async def send_message_and_notification(
-    to_user_uid: str, from_user_uid: str, body: str, reply_to_message: Optional[int] = None
+    to_user_uid: str,
+    from_user_uid: str,
+    body: str,
+    reply_to_message: Optional[int] = None,
 ):
     if to_user_uid == from_user_uid:
-        raise exceptions.NotSentMessageToMyselfException("You can't send the message yourself")
+        raise exceptions.MessageHasNotSended
     try:
         await MessagesService.insert_into_table(
             to_user_uid=to_user_uid,
@@ -43,7 +46,7 @@ async def send_message_and_notification(
             reply_to_message=reply_to_message,
         )
     except IntegrityError:
-        raise exceptions.MessageCreateException("Couldn't send message")
+        raise exceptions.MessageHasNotSended
 
 
 async def get_messsages_on_category(

@@ -1,3 +1,6 @@
+from fastapi import HTTPException, status
+
+
 class MessagesException(Exception):
     def __init__(self, detail: str, *args: object) -> None:
         super().__init__(*args)
@@ -7,13 +10,11 @@ class MessagesException(Exception):
         return f"{self.__class__.__name__}({self.detail})"
 
 
-class MessageVerifyException(MessagesException):
-    pass
+UserNotAcceptedThisMessage = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN,
+    detail="The user has not accepted this message",
+)
 
-
-class MessageCreateException(MessagesException):
-    pass
-
-
-class NotSentMessageToMyselfException(MessagesException):
-    pass
+MessageHasNotSended = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST, detail="Fail to send a message"
+)

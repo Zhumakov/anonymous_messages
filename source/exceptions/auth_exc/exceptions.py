@@ -1,51 +1,37 @@
-class AuthException(Exception):
-    def __init__(self, detail: str, *args: object) -> None:
-        super().__init__(*args)
-        self.detail = detail
+from fastapi import HTTPException, status
 
-    def __str__(self) -> str:
-        return f"{self.__class__.__name__}({self.detail})"
+IsNotAuthorized = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED, detail="User is not is not authorized"
+)
 
+TokenValidException = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED, detail="Token is expired"
+)
 
-class IsNotAuthorized(AuthException):
-    pass
+RefreshTokenIsInvalid = HTTPException(
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Refresh token is invalid"
+)
 
+UserAlreadyExist = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="User already exist",
+    headers={"field": "email"},
+)
 
-class UserCreateException(AuthException):
-    pass
+UsernameAlreadyExist = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="This username already exist",
+    headers={"field": "usernames"},
+)
 
+UserCreateFail = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST, detail="Fail to create user"
+)
 
-class TokenValidException(AuthException):
-    pass
+AuthFailed = HTTPException(
+    status_code=status.HTTP_403_FORBIDDEN, detail="Invalid username or password"
+)
 
-
-class TokenDataException(AuthException):
-    pass
-
-
-class UserIsNotExistException(AuthException):
-    pass
-
-
-class RefreshTokenIdIsNotValidException(AuthException):
-    pass
-
-
-class RefreshTokenSetException(AuthException):
-    pass
-
-
-class PasswordIsInvalidException(AuthException):
-    pass
-
-
-class PasswordChangeException(AuthException):
-    pass
-
-
-class ExistingUserException(AuthException):
-    pass
-
-
-class ExistingUsernameException(AuthException):
-    pass
+RefreshTokenCreateFailed = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST, detail="Refresh token is not created"
+)

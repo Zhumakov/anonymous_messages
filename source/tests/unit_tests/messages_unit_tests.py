@@ -1,9 +1,9 @@
-import pytest
+from typing import Optional
 
-from source.exceptions.messages_exc.exceptions import (
-    MessageVerifyException,
-    NotSentMessageToMyselfException,
-)
+import pytest
+from fastapi import HTTPException
+
+from source.exceptions.messages_exc import exceptions
 from source.messages.core import (
     get_messsages_on_category,
     send_message_and_notification,
@@ -43,10 +43,17 @@ class TestsCore:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "user_uid,message_id,is_exc",
-        (("2", 1, False), ("2", 3, True), ("2", 9999, True), ("2", 2, True)),
+        "user_uid,message_id,error",
+        (
+            ("2", 1, None),
+            ("2", 3, exceptions.UserNotAcceptedThisMessage),
+            ("2", 9999, exceptions.UserNotAcceptedThisMessage),
+            ("2", 2, exceptions.UserNotAcceptedThisMessage),
+        ),
     )
-    async def test_verify_and_get_message(user_uid: str, message_id: int, is_exc: bool):
+    async def test_verify_and_get_message(
+        user_uid: str, message_id: int, error: Optional[HTTPException]
+    ):
         """
         Test 1: The user received the specified message
         Test 2: The user is trying to reply to a message that is a reply
@@ -55,16 +62,17 @@ class TestsCore:
         """
         try:
             await verify_and_get_message(user_uid, message_id)
-            assert not is_exc
-        except MessageVerifyException:
-            assert is_exc
+            assert not error
+        except HTTPException as exc:
+            assert exc == error
 
     @staticmethod
     @pytest.mark.parametrize(
-        "to_user_uid,from_user_uid,is_exc", (("2", "1", False), ("2", "2", True))
+        "to_user_uid,from_user_uid,error",
+        (("2", "1", None), ("2", "2", exceptions.MessageHasNotSended)),
     )
     async def test_send_and_notification_message(
-        to_user_uid: str, from_user_uid: str, is_exc: bool
+        to_user_uid: str, from_user_uid: str, error: Optional[HTTPException]
     ):
         try:
             await send_message_and_notification(
@@ -72,9 +80,9 @@ class TestsCore:
                 from_user_uid=from_user_uid,
                 body="Test message",
             )
-            assert not is_exc
-        except NotSentMessageToMyselfException:
-            assert is_exc
+            assert not error
+        except HTTPException as exc:
+            assert exc == error
 
     @staticmethod
     @pytest.mark.parametrize("category,is_exc", (("accepted", False), ("uknown", True)))

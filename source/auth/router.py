@@ -1,9 +1,15 @@
-from fastapi import APIRouter, Cookie, Depends, Response, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from sqlalchemy.exc import IntegrityError
 
-from source.auth.auth import register_user, set_tokens_in_cookies
-from source.auth.dependenties import get_current_user, verify_refresh_token
+from source.auth.core import register_user, set_tokens_in_cookies, verify_refresh_token
+from source.auth.dependenties import get_current_user
 from source.auth.models import User
-from source.auth.schemas import SUserLogin, SUserRegistration, SUserResponse, SUserSwitchPassword
+from source.auth.schemas import (
+    SUserLogin,
+    SUserRegistration,
+    SUserResponse,
+    SUserSwitchPassword,
+)
 from source.auth.service import UsersService
 
 router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
@@ -38,24 +44,38 @@ async def get_auth_user(user: User = Depends(get_current_user)):
 async def switch_password_current_user(
     passwords: SUserSwitchPassword, user: User = Depends(get_current_user)
 ):
-    await UsersService.switch_password(
-        passwords.current_password, passwords.new_password, str(user.email)
-    )
+    try:
+        await UsersService.switch_password(
+            passwords.current_password, passwords.new_password, str(user.email)
+        )
+    except IntegrityError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Password to change failed"
+        )
 
 
 @router.post(path="/auth", description="Authenticate user", name="login_user")
 async def login_user(response: Response, user_data: SUserLogin):
-    user = await UsersService.authenticate_user(email=user_data.email, password=user_data.password)
+    user = await UsersService.authenticate_user(
+        email=user_data.email, password=user_data.password
+    )
 
-    response, session_token, refresh_token = await set_tokens_in_cookies(response, str(user.id))
+    response, session_token, refresh_token = await set_tokens_in_cookies(
+        response, str(user.id)
+    )
 
 
-@router.get(path="/auth/refresh", description="Refresh session token", name="refresh_tokens")
+@router.get(
+    path="/auth/refresh", description="Refresh session token", name="refresh_tokens"
+)
 async def refresh_tokens(
-    response: Response, anonym_refresh_token: str = Cookie(description="Cookie for refresh tokens")
+    response: Response,
+    anonym_refresh_token: str = Cookie(description="Cookie for refresh tokens"),
 ):
     user = await verify_refresh_token(anonym_refresh_token)
-    response, session_token, refresh_token = await set_tokens_in_cookies(response, str(user.id))
+    response, session_token, refresh_token = await set_tokens_in_cookies(
+        response, str(user.id)
+    )
 
 
 @router.delete(

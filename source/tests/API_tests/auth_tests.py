@@ -31,13 +31,15 @@ async def test_registration(
     "email,password,status_code",
     [
         ("logintest@gmail.com", "password", status.HTTP_200_OK),
-        ("1234@gmail.com", "password", status.HTTP_401_UNAUTHORIZED),
-        ("logintest@gmail.com", "wrong_password", status.HTTP_422_UNPROCESSABLE_ENTITY),
+        ("1234@gmail.com", "password", status.HTTP_403_FORBIDDEN),
+        ("logintest@gmail.com", "wrong_password", status.HTTP_403_FORBIDDEN),
     ],
 )
 async def test_login(email: str, password, status_code, async_client: AsyncClient):
     url = app.url_path_for("login_user")
-    response: Response = await async_client.post(url, json={"email": email, "password": password})
+    response: Response = await async_client.post(
+        url, json={"email": email, "password": password}
+    )
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert response.cookies.get("anonym_site_token", "")
@@ -57,7 +59,11 @@ async def test_get_current_user(auth_async_client: AsyncClient):
     url = app.url_path_for("get_auth_user")
     response: Response = await auth_async_client.get(url)
     user: dict = response.json()
-    plained_user = {"email": "logintest@gmail.com", "user_uid": "1", "username": "logintest"}
+    plained_user = {
+        "email": "logintest@gmail.com",
+        "user_uid": "1",
+        "username": "logintest",
+    }
     assert all(item in user.items() for item in plained_user.items())
 
 
@@ -91,4 +97,4 @@ async def test_switch_passwords(async_client: AsyncClient):
     response: Response = await async_client.post(
         login_url, json={"email": "email@gmail.com", "password": "password"}
     )
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_403_FORBIDDEN

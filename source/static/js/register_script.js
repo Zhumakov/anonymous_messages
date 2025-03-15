@@ -38,43 +38,49 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(formData) // Преобразуем объект в JSON-строку
         })
-        .then(response => {
-            if (response.ok) {
-                // Успешная регистрация, перенаправляем на главную страницу
-                window.location.href = '/';
-            } else {
-                console.error('Ошибка при регистрации', response.status);
-                switch (response.status) {
-                    case 400:
-                        response.text().then(errorMessage => {
-                            console.error(errorMessage);
-                            displayError('Не удалось зарегестрировать пользователя');
-                        });
-                        break;
-                    case 409:
-                        response.text().then(errorMessage => {
-                            console.error(errorMessage);
-                            displayError('Пользователь с таким именем или электронной почтой уже существует');
-                        });
-                        break;
-                    case 422:
-                        response.text().then(errorMessage => {
-                            console.error(errorMessage);
-                            displayError('Данные не допустимы');
-                        });
-                        break;
-                    default:
-                        response.text().then(errorMessage => {
-                            console.error(errorMessage);
-                            displayError('Произошла ошибка');
-                        });
-                        break;
+            .then(response => {
+                if (response.ok) {
+                    fetch('/api/users/auth', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json' // Указываем, что отправляем JSON
+                        },
+                        body: JSON.stringify(formData) // Преобразуем объект в JSON-строку
+                    })
+                    window.location.href = '/';
+                } else {
+                    console.error('Ошибка при регистрации', response.status);
+                    switch (response.status) {
+                        case 400:
+                            response.text().then(errorMessage => {
+                                console.error(errorMessage);
+                                displayError('Не удалось зарегестрировать пользователя');
+                            });
+                            break;
+                        case 409:
+                            response.text().then(errorMessage => {
+                                console.error(errorMessage);
+                                displayError('Пользователь с таким именем или электронной почтой уже существует');
+                            });
+                            break;
+                        case 422:
+                            response.text().then(errorMessage => {
+                                console.error(errorMessage);
+                                displayError('Данные не допустимы');
+                            });
+                            break;
+                        default:
+                            response.text().then(errorMessage => {
+                                console.error(errorMessage);
+                                displayError('Произошла ошибка');
+                            });
+                            break;
+                    }
                 }
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка сети:', error);
-            displayError('Ошибка сети: проверьте подключение');
-        });
+            })
+            .catch(error => {
+                console.error('Ошибка сети:', error);
+                displayError('Ошибка сети: проверьте подключение');
+            });
     });
 });

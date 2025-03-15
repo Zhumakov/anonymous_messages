@@ -66,7 +66,7 @@ async def login_user(response: Response, user_data: SUserLogin):
 
 
 @router.get(
-    path="/auth/refresh", description="Refresh session token", name="refresh_tokens"
+    path="/auth/tokens", description="Refresh session token", name="refresh_tokens"
 )
 async def refresh_tokens(
     response: Response,

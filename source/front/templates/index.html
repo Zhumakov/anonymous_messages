@@ -18,12 +18,13 @@
   <main>
     <div class="profile-container">
       <div class="profile-avatar">
-        <img src="{% if user.avatar_url %}{{ url_for('static', path='/avatars/' +
-        user.avatar_name) }}{% else %}{{ url_for('static', path='/avatars/default.jpeg') }}{% endif %}" alt="Аватар">
+          <img id="profile-avatar" src="{{ url_for('static', path='/avatars/default.jpeg') }}" alt="profile-avatar">
       </div>
       <div class="profile-info">
-        <h2>User UID: {{ user.user_uid }}</h2>
-        <p><b>О себе: </b>{% if user.about_me %}{{ user.about_me  }}{% else %}{{ "Ничего"  }}{% endif %}</p>
+        <h2 id="username">Аноним</h2>
+        <h4 id="about-me">Неизвестно</h4>
+        <p id="user-uid">####</p>
+        <p id="email">anonim@anonim.com</p>
       </div>
     </div>
 

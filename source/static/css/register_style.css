@@ -94,7 +94,7 @@ input[type="password"]:focus {
     color: red;
     display: none;
     border: 1px solid red;
-    border-radius: 2px;
+    border-radius: 5px;
     padding: 5px;
     margin: 5px 0px;
 }

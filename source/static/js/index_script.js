@@ -1,6 +1,63 @@
-document.addEventListener('DOMContentLoaded', function() {
+async function attemptAuthorization() {
+  const response = await fetch('/api/users/auth/tokens');
+  if (response.ok) {
+    return true
+  } else {
+    return false
+  };
+}
+
+
+async function GetAuthorizedUser() {
+  const response = await fetch('/api/users');
+
+  if (response.ok) {
+    const userData = await response.json();
+    return userData;
+  } else {
+    switch (response.status) {
+      case 401:
+        const success = await attemptAuthorization();
+        if (success) {
+          // Авторизация прошла успешно, повторяем запрос
+          return await GetAuthorizedUser();
+        } else {
+          window.location.href = '/login';
+        }
+        break;
+      default:
+        return null;
+    }
+  }
+}
+
+
+document.addEventListener('DOMContentLoaded', async function() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const messageContainer = document.getElementById('message-container');
+
+  const userAvatar = document.getElementById('profile-avatar');
+  const username = document.getElementById('username');
+  const userAbout = document.getElementById('about-me');
+  const userUID = document.getElementById('user-uid');
+  const email = document.getElementById('email');
+
+  const userInfo = await GetAuthorizedUser();
+  if (userInfo.hasOwnProperty('avatar_url')) {
+    userAvatar.src = userInfo.avatar_url
+  };
+  if (userInfo.hasOwnProperty('username')) {
+    username.textContent = userInfo.username
+  };
+  if (userInfo.hasOwnProperty('about_me')) {
+    userAbout.textContent = userInfo.about_me
+  };
+  if (userInfo.hasOwnProperty('user_uid')) {
+    userUID.textContent = userInfo.user_uid
+  };
+  if (userInfo.hasOwnProperty('email')) {
+    email.textContent = userInfo.email
+  };
 
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
@@ -20,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Функция для загрузки сообщений из API
   function loadMessages(tab) {
     // Определяем URL API в зависимости от выбранной вкладки
-    let apiUrl = `/api/message/${tab}`; 
+    let apiUrl = `/api/message/${tab}`;
 
     // Показываем индикатор загрузки
     messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
@@ -28,7 +85,19 @@ document.addEventListener('DOMContentLoaded', function() {
     fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          switch (response.status) {
+            case 401:
+              const success = attemptAuthorization();
+              if (success) {
+                // Авторизация прошла успешно, повторяем запрос
+                return loadMessages(tab)
+              } else {
+                window.location.href = '/login';
+              }
+              break;
+            default:
+              throw new Error('Server error');
+          }
         }
         return response.json(); // Преобразуем ответ в JSON
       })

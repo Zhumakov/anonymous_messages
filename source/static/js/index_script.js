@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const userAvatar = document.getElementById('profile-avatar');
   const username = document.getElementById('username');
-  const userAbout = document.getElementById('about-me');
   const userUID = document.getElementById('user-uid');
   const email = document.getElementById('email');
 
@@ -49,9 +48,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (userInfo.hasOwnProperty('username')) {
     username.textContent = userInfo.username
   };
-  if (userInfo.hasOwnProperty('about_me')) {
-    userAbout.textContent = userInfo.about_me
-  };
   if (userInfo.hasOwnProperty('user_uid')) {
     userUID.textContent = userInfo.user_uid
   };
@@ -59,9 +55,26 @@ document.addEventListener('DOMContentLoaded', async function() {
     email.textContent = userInfo.email
   };
 
+  const logoutButton = document.getElementsByClassName('logout-button');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', function() {
+      fetch('/api/users/auth', {
+        method: 'DELETE',
+      })
+        .then(response => {
+          if (response.ok) {
+            window.location.href = '/login';
+          }
+        })
+        .catch(error => {
+          alert("Ошибка сети")
+        });
+    });
+  }
+
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
-      const tab = this.dataset.tab; // Получаем значение data-tab атрибута
+      const tab = this.dataset.tab;
 
       // Удаляем класс 'active' у всех кнопок
       tabButtons.forEach(btn => btn.classList.remove('active'));

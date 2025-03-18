@@ -25,9 +25,10 @@
         <p id="user-uid">####</p>
         <p id="email">anonim@anonim.com</p>
 
-        <<button class="logout-button"></button>
+        <button class="logout-button">Выйти из аккаунта</button>
       </div>
     </div>
+    <button class="open-modal-button">Отправить сообщение</button>
 
     <div class="message-navigation">
       <button data-tab="accepted" class="tab-button">Принятые</button>
@@ -37,8 +38,30 @@
 
     <div id="message-container" class="message-list">
     </div>
-  </main>
 
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="close">&times;</span>
+          <h2>Отправить сообщение</h2>
+        </div>
+        <div class="modal-body">
+          <form id="message-form">
+            <label for="uid">UID пользователя:</label>
+            <input type="text" id="uid" name="uid" placeholder="Введите UID пользователя">
+
+            <label for="message">Текст сообщения:</label>
+            <textarea id="message" name="message" placeholder="Введите текст сообщения"></textarea>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="send-button">Отправить</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
   <footer>
     <div class="bottom-bar">
       <p>&copy; 2023 Мой анонимный сайт. Все права защищены.</p>

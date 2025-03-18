@@ -32,9 +32,101 @@ async function GetAuthorizedUser() {
 }
 
 
+function loadMessages(tab) {
+  const messageContainer = document.getElementById('message-container');
+  let apiUrl = `/api/message/${tab}`;
+
+  messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
+
+  fetch(apiUrl)
+    .then(response => {
+      if (!response.ok) {
+        switch (response.status) {
+          case 401:
+            const success = attemptAuthorization();
+            if (success) {
+              return loadMessages(tab)
+            } else {
+              window.location.href = '/login';
+            }
+            break;
+          default:
+            throw new Error('Server error');
+        }
+      }
+      return response.json();
+    })
+    .then(messages => {
+      displayMessages(messages);
+    })
+    .catch(error => {
+      console.error('Ошибка при загрузке сообщений:', error);
+      messageContainer.innerHTML = '<div class="error">Ошибка при загрузке сообщений.</div>';
+    });
+}
+
+
+function displayMessages(messages) {
+  const messageContainer = document.getElementById('message-container');
+  messageContainer.innerHTML = '';
+
+  if (messages && messages.length > 0) {
+    messages.forEach(message => {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message');
+
+      messageElement.innerHTML = `
+          <div class="message-header">
+            <span class="sender">Неизвестный отправитель</span>
+            <span class="date">${message.date || 'Неизвестная дата'}</span>
+          </div>
+          <div class="message-body">
+            ${message.body || 'Нет текста сообщения'}
+          </div>
+        `;
+
+      messageContainer.appendChild(messageElement);
+    });
+  } else {
+    messageContainer.innerHTML = '<div class="empty">Нет сообщений.</div>';
+  }
+}
+
+
+async function sendMessage() {
+
+  var uid = document.getElementById("uid").value;
+  var message = document.getElementById("message").value;
+  var modal = document.getElementById("modal");
+
+  fetch('/api/message', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      to_user_uid: uid,
+      body: message
+    })
+  })
+    .then(response => {
+      if (response.ok) {
+        modal.style.display = "none";
+        document.getElementById("uid").value = "";
+        document.getElementById("message").value = "";
+
+      } else {
+        alert("Произошла ошибка при отправке сообщения.");
+      }
+    })
+    .catch(error => {
+      alert("Произошла ошибка сети при отправке сообщения.");
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', async function() {
   const tabButtons = document.querySelectorAll('.tab-button');
-  const messageContainer = document.getElementById('message-container');
 
   const userAvatar = document.getElementById('profile-avatar');
   const username = document.getElementById('username');
@@ -55,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     email.textContent = userInfo.email
   };
 
-  const logoutButton = document.getElementsByClassName('logout-button');
+  const logoutButton = document.getElementsByClassName('logout-button')[0];
   if (logoutButton) {
     logoutButton.addEventListener('click', function() {
       fetch('/api/users/auth', {
@@ -87,72 +179,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
 
-  // Функция для загрузки сообщений из API
-  function loadMessages(tab) {
-    // Определяем URL API в зависимости от выбранной вкладки
-    let apiUrl = `/api/message/${tab}`;
 
-    // Показываем индикатор загрузки
-    messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
+  var modal = document.getElementById("modal");
+  var btn = document.getElementsByClassName("open-modal-button")[0];
+  var closeSpan = document.getElementsByClassName("close")[0];
+  var sendButton = document.getElementById("send-button");
 
-    fetch(apiUrl)
-      .then(response => {
-        if (!response.ok) {
-          switch (response.status) {
-            case 401:
-              const success = attemptAuthorization();
-              if (success) {
-                // Авторизация прошла успешно, повторяем запрос
-                return loadMessages(tab)
-              } else {
-                window.location.href = '/login';
-              }
-              break;
-            default:
-              throw new Error('Server error');
-          }
-        }
-        return response.json(); // Преобразуем ответ в JSON
-      })
-      .then(messages => {
-        // Отображаем сообщения в контейнере
-        displayMessages(messages);
-      })
-      .catch(error => {
-        console.error('Ошибка при загрузке сообщений:', error);
-        messageContainer.innerHTML = '<div class="error">Ошибка при загрузке сообщений.</div>';
-      });
-  }
+  btn.onclick = function() {
+    modal.style.display = "block";
+  };
 
-  // Функция для отображения сообщений
-  function displayMessages(messages) {
-    messageContainer.innerHTML = ''; // Очищаем контейнер
+  closeSpan.onclick = function() {
+    modal.style.display = "none";
+  };
 
-    if (messages && messages.length > 0) {
-      messages.forEach(message => {
-        // Создаем элементы HTML для отображения каждого сообщения
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message'); // Можно добавить класс для стилизации
-
-        // Пример отображения данных сообщения (замените на свои поля)
-        messageElement.innerHTML = `
-          <div class="message-header">
-            <span class="sender">Неизвестный отправитель</span>
-            <span class="date">${message.date || 'Неизвестная дата'}</span>
-          </div>
-          <div class="message-body">
-            ${message.body || 'Нет текста сообщения'}
-          </div>
-        `;
-
-        messageContainer.appendChild(messageElement);
-      });
-    } else {
-      messageContainer.innerHTML = '<div class="empty">Нет сообщений.</div>';
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
     }
-  }
+  };
 
-  // Загружаем сообщения для вкладки "Принятые" по умолчанию при загрузке страницы
+  sendButton.onclick = sendMessage;
+
+
   loadMessages('accepted');
   tabButtons[0].classList.add('active');
 });

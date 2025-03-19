@@ -1,100 +1,100 @@
 body {
-    font-family: sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; 
+  font-family: sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 header {
-    background-color: var(--header-footer-color);
-    padding: 10px 20px 0 20px;
-    text-align: center;
+  background-color: var(--header-footer-color);
+  padding: 10px 20px 0 20px;
+  text-align: center;
 }
 
 main {
-    flex: 1; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .form-container {
-    background-color: var(--message-background-color); 
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 30px;
-    width: 400px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  background-color: var(--message-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 30px;
+  width: 400px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    box-sizing: border-box; 
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  box-sizing: border-box;
 }
 
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus {
-    outline: none;
-    border-color: var(--button-color);
-    box-shadow: 0 0 5px var(--button-color);
+  outline: none;
+  border-color: var(--button-color);
+  box-shadow: 0 0 5px var(--button-color);
 }
 
 .button {
-    background-color: var(--button-color);
-    color: var(--text-color);
-    padding: 14px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+  background-color: var(--button-color);
+  color: var(--text-color);
+  padding: 14px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
 .button:hover {
-    background-color: var(--active-button-color);
+  background-color: var(--active-button-color);
 }
 
 .message {
-    text-align: center;
-    margin-top: 20px;
+  text-align: center;
+  margin-top: 20px;
 }
 
 .link {
-    color: var(--botton-link-color);
-    text-decoration: none;
+  color: var(--botton-link-color);
+  text-decoration: none;
 }
 
 .link:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 .error {
-    color: red;
-    display: none;
-    border: 1px solid red;
-    border-radius: 5px;
-    padding: 5px;
-    margin: 5px 0px;
+  color: red;
+  display: none;
+  border: 1px solid red;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px 0px;
 }

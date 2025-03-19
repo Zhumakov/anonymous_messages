@@ -1,41 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Регистрация</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/colors.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/register_style.css') }}">
-  <script src="{{ url_for('static', path='/js/login_script.js') }}"></script>
-</head>
-<body>
-  <header>
-    <h1>Вход</h1>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Регистрация</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/colors.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/register_style.css') }}"
+    />
+    <script src="{{ url_for('static', path='/js/login_script.js') }}"></script>
+  </head>
+  <body>
+    <header>
+      <h1>Вход</h1>
+    </header>
 
-  <main>
-    <section class="form-container">
-      <form id="registerForm">
+    <main>
+      <section class="form-container">
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+          </div>
 
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" required>
-        </div>
+          <div class="form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required />
+          </div>
 
-        <div class="form-group">
-          <label for="password">Пароль:</label>
-          <input type="password" id="password" name="password" required>
-        </div>
+          <div id="error_block" class="message error"></div>
 
-        <div id="error_block" class="message error"></div>
+          <button type="submit" class="button">Войти</button>
 
-        <button type="submit" class="button">Войти</button>
-
-        <div class="message">
-          Еще не зарегистрированы? <a href="/register" class="link">Зарегистрироваться</a>
-        </div>
-      </form>
-    </section>
-  </main>
-</body>
+          <div class="message">
+            Еще не зарегистрированы?
+            <a href="/register" class="link">Зарегистрироваться</a>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
 </html>

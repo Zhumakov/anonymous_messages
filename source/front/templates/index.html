@@ -1,72 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Анонимный сайт</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/colors.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', path='/css/index_style.css') }}">
-  <script src="{{ url_for('static', path='/js/index_script.js') }}"></script>
-</head>
-<body>
-  <header>
-    <div class="top-bar">
-      <h1>Анонимный сайт</h1>
-    </div>
-  </header>
-
-  <main>
-    <div class="profile-container">
-      <div class="profile-avatar">
-          <img id="profile-avatar" src="{{ url_for('static', path='/avatars/default.jpeg') }}" alt="profile-avatar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Анонимный сайт</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/colors.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/index_style.css') }}"
+    />
+    <script src="{{ url_for('static', path='/js/index_script.js') }}"></script>
+  </head>
+  <body>
+    <header>
+      <div class="top-bar">
+        <h1>Анонимный сайт</h1>
       </div>
-      <div class="profile-info">
-        <h2 id="username">Аноним</h2>
-        <p id="user-uid">####</p>
-        <p id="email">anonim@anonim.com</p>
+    </header>
 
-        <button class="logout-button">Выйти из аккаунта</button>
-      </div>
-    </div>
-    <button class="open-modal-button">Отправить сообщение</button>
-
-    <div class="message-navigation">
-      <button data-tab="accepted" class="tab-button">Принятые</button>
-      <button data-tab="reply" class="tab-button">Ответы</button>
-      <button data-tab="sended" class="tab-button">Отправленные</button>
-    </div>
-
-    <div id="message-container" class="message-list">
-    </div>
-
-
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <span class="close">&times;</span>
-          <h2>Отправить сообщение</h2>
+    <main>
+      <div class="profile-container">
+        <div class="profile-avatar">
+          <img
+            id="profile-avatar"
+            src="/static/avatars/default.jpeg"
+            alt="profile-avatar"
+          />
         </div>
-        <div class="modal-body">
-          <form id="message-form">
-            <label for="uid">UID пользователя:</label>
-            <input type="text" id="uid" name="uid" placeholder="Введите UID пользователя">
+        <div class="profile-info">
+          <h2 id="username">Аноним</h2>
+          <p id="user-uid">####</p>
+          <p id="email">anonim@anonim.com</p>
 
-            <label for="message">Текст сообщения:</label>
-            <textarea id="message" name="message" placeholder="Введите текст сообщения"></textarea>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" id="send-button">Отправить</button>
+          <button class="logout-button">Выйти из аккаунта</button>
         </div>
       </div>
-    </div>
+      <button class="open-modal-button">Отправить сообщение</button>
 
-  </main>
-  <footer>
-    <div class="bottom-bar">
-      <p>&copy; 2023 Мой анонимный сайт. Все права защищены.</p>
-      <p>Контакты: example@example.com</p>
-    </div>
-  </footer>
-</body>
+      <div class="message-navigation">
+        <button data-tab="accepted" class="tab-button">Принятые</button>
+        <button data-tab="reply" class="tab-button">Ответы</button>
+        <button data-tab="sended" class="tab-button">Отправленные</button>
+      </div>
+
+      <div id="message-container" class="message-list"></div>
+
+      <div id="modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <span class="close">&times;</span>
+            <h2>Отправить сообщение</h2>
+          </div>
+          <div class="modal-body">
+            <form id="message-form">
+              <label for="uid">UID пользователя:</label>
+              <input
+                type="text"
+                id="uid"
+                name="uid"
+                placeholder="Введите UID пользователя"
+              />
+
+              <label for="message">Текст сообщения:</label>
+              <textarea
+                id="message"
+                name="message"
+                placeholder="Введите текст сообщения"
+              ></textarea>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="send-button">Отправить</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="notification-container"></div>
+    </main>
+    <footer>
+      <div class="bottom-bar">
+        <p>&copy; 2023 Мой анонимный сайт. Все права защищены.</p>
+        <p>Контакты: example@example.com</p>
+      </div>
+    </footer>
+  </body>
 </html>

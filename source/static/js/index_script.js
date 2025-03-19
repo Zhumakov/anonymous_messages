@@ -1,15 +1,14 @@
 async function attemptAuthorization() {
-  const response = await fetch('/api/users/auth/tokens');
+  const response = await fetch("/api/users/auth/tokens");
   if (response.ok) {
-    return true
+    return true;
   } else {
-    return false
-  };
+    return false;
+  }
 }
 
-
 async function GetAuthorizedUser() {
-  const response = await fetch('/api/users');
+  const response = await fetch("/api/users");
 
   if (response.ok) {
     const userData = await response.json();
@@ -22,7 +21,7 @@ async function GetAuthorizedUser() {
           // Авторизация прошла успешно, повторяем запрос
           return await GetAuthorizedUser();
         } else {
-          window.location.href = '/login';
+          window.location.href = "/login";
         }
         break;
       default:
@@ -31,57 +30,56 @@ async function GetAuthorizedUser() {
   }
 }
 
-
 function loadMessages(tab) {
-  const messageContainer = document.getElementById('message-container');
+  const messageContainer = document.getElementById("message-container");
   let apiUrl = `/api/message/${tab}`;
 
   messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
 
   fetch(apiUrl)
-    .then(response => {
+    .then((response) => {
       if (!response.ok) {
         switch (response.status) {
           case 401:
             const success = attemptAuthorization();
             if (success) {
-              return loadMessages(tab)
+              return loadMessages(tab);
             } else {
-              window.location.href = '/login';
+              window.location.href = "/login";
             }
             break;
           default:
-            throw new Error('Server error');
+            throw new Error("Server error");
         }
       }
       return response.json();
     })
-    .then(messages => {
+    .then((messages) => {
       displayMessages(messages);
     })
-    .catch(error => {
-      console.error('Ошибка при загрузке сообщений:', error);
-      messageContainer.innerHTML = '<div class="error">Ошибка при загрузке сообщений.</div>';
+    .catch((error) => {
+      console.error("Ошибка при загрузке сообщений:", error);
+      messageContainer.innerHTML =
+        '<div class="error">Ошибка при загрузке сообщений.</div>';
     });
 }
 
-
 function displayMessages(messages) {
-  const messageContainer = document.getElementById('message-container');
-  messageContainer.innerHTML = '';
+  const messageContainer = document.getElementById("message-container");
+  messageContainer.innerHTML = "";
 
   if (messages && messages.length > 0) {
-    messages.forEach(message => {
-      const messageElement = document.createElement('div');
-      messageElement.classList.add('message');
+    messages.forEach((message) => {
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message");
 
       messageElement.innerHTML = `
           <div class="message-header">
             <span class="sender">Неизвестный отправитель</span>
-            <span class="date">${message.date || 'Неизвестная дата'}</span>
+            <span class="date">${message.date || "Неизвестная дата"}</span>
           </div>
           <div class="message-body">
-            ${message.body || 'Нет текста сообщения'}
+            ${message.body || "Нет текста сообщения"}
           </div>
         `;
 
@@ -92,93 +90,113 @@ function displayMessages(messages) {
   }
 }
 
-
 async function sendMessage() {
-
   var uid = document.getElementById("uid").value;
   var message = document.getElementById("message").value;
   var modal = document.getElementById("modal");
 
-  fetch('/api/message', {
-    method: 'POST',
+  fetch("/api/message", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       to_user_uid: uid,
-      body: message
-    })
+      body: message,
+    }),
   })
-    .then(response => {
+    .then((response) => {
+      modal.style.display = "none";
       if (response.ok) {
-        modal.style.display = "none";
         document.getElementById("uid").value = "";
         document.getElementById("message").value = "";
-
+        displayNotification("Сообщение успешно отправлено", "success");
       } else {
-        alert("Произошла ошибка при отправке сообщения.");
+        switch (response.status) {
+          case 400:
+            displayNotification(
+              "Не удалось отправить сообщение, пользователь с данным UID не найден",
+              "failed",
+            );
+            break;
+          case 422:
+            displayNotification(
+              "Не удалось отправить сообщение, укажите UID пользователя и введите текст сообщения",
+              "failed",
+            );
+            break;
+        }
       }
     })
-    .catch(error => {
-      alert("Произошла ошибка сети при отправке сообщения.");
+    .catch((error) => {
+      displayNotification(
+        "Произошла ошибка сети, пожалуйста повторите попытку",
+        "failed",
+      );
     });
 }
 
+async function displayNotification(message, type = "info") {
+  const container = document.getElementsByClassName(
+    "notification-container",
+  )[0];
+  const notificationElement = document.createElement("div");
+  notificationElement.classList.add("notification", type);
+  notificationElement.textContent = message;
 
-document.addEventListener('DOMContentLoaded', async function() {
-  const tabButtons = document.querySelectorAll('.tab-button');
+  container.appendChild(notificationElement);
+  notificationElement.style.display = "block";
 
-  const userAvatar = document.getElementById('profile-avatar');
-  const username = document.getElementById('username');
-  const userUID = document.getElementById('user-uid');
-  const email = document.getElementById('email');
+  setTimeout(function() {
+    notificationElement.remove();
+  }, 3000);
+}
+
+document.addEventListener("DOMContentLoaded", async function() {
+  const tabButtons = document.querySelectorAll(".tab-button");
+
+  const username = document.getElementById("username");
+  const userUID = document.getElementById("user-uid");
+  const email = document.getElementById("email");
 
   const userInfo = await GetAuthorizedUser();
-  if (userInfo.hasOwnProperty('avatar_url')) {
-    userAvatar.src = userInfo.avatar_url
-  };
-  if (userInfo.hasOwnProperty('username')) {
-    username.textContent = userInfo.username
-  };
-  if (userInfo.hasOwnProperty('user_uid')) {
-    userUID.textContent = userInfo.user_uid
-  };
-  if (userInfo.hasOwnProperty('email')) {
-    email.textContent = userInfo.email
-  };
+  if (userInfo.hasOwnProperty("username")) {
+    username.textContent = userInfo.username;
+  }
+  if (userInfo.hasOwnProperty("user_uid")) {
+    userUID.textContent = userInfo.user_uid;
+  }
+  if (userInfo.hasOwnProperty("email")) {
+    email.textContent = userInfo.email;
+  }
 
-  const logoutButton = document.getElementsByClassName('logout-button')[0];
+  const logoutButton = document.getElementsByClassName("logout-button")[0];
   if (logoutButton) {
-    logoutButton.addEventListener('click', function() {
-      fetch('/api/users/auth', {
-        method: 'DELETE',
+    logoutButton.addEventListener("click", function() {
+      fetch("/api/users/auth", {
+        method: "DELETE",
       })
-        .then(response => {
+        .then((response) => {
           if (response.ok) {
-            window.location.href = '/login';
+            window.location.href = "/login";
           }
         })
-        .catch(error => {
-          alert("Ошибка сети")
+        .catch((error) => {
+          displayNotification("Ошибка сети", "failed");
         });
     });
   }
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function() {
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", function() {
       const tab = this.dataset.tab;
 
-      // Удаляем класс 'active' у всех кнопок
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      // Добавляем класс 'active' к нажатой кнопке
-      this.classList.add('active');
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      this.classList.add("active");
 
-
-      // Вызываем функцию для загрузки сообщений
       loadMessages(tab);
     });
   });
-
 
   var modal = document.getElementById("modal");
   var btn = document.getElementsByClassName("open-modal-button")[0];
@@ -201,7 +219,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   sendButton.onclick = sendMessage;
 
-
-  loadMessages('accepted');
-  tabButtons[0].classList.add('active');
+  loadMessages("accepted");
+  tabButtons[0].classList.add("active");
 });

@@ -2,7 +2,34 @@ import pytest
 from httpx import AsyncClient, Response
 
 
-@pytest.mark.parametrize("to_user_uid,is_error", (("2", False), ("1", True), ("999", True)))
+@pytest.mark.parametrize(
+    "category,message_body,username",
+    (
+        ("accepted", "message 3", ""),
+        ("reply", "message 2", "messagetest"),
+        ("sended", "message 1", "messagetest"),
+    ),
+)
+async def test_get_messages(
+    category: str,
+    message_body: str,
+    username: str,
+    async_client_with_mocked_auth: AsyncClient,
+):
+    response: Response = await async_client_with_mocked_auth.get(
+        f"/api/message/{category}"
+    )
+    assert response.json()[0].get("body") == message_body
+
+    if category == "reply":
+        assert response.json()[0].get("from_user") == username
+    elif category == "sended":
+        assert response.json()[0].get("to_user") == username
+
+
+@pytest.mark.parametrize(
+    "to_user_uid,is_error", (("2", False), ("1", True), ("999", True))
+)
 async def test_send_message(
     to_user_uid: str, is_error: bool, async_client_with_mocked_auth: AsyncClient
 ):
@@ -26,14 +53,3 @@ async def test_reply_on_message(
         assert response.is_success
     else:
         assert response.is_error
-
-
-@pytest.mark.parametrize(
-    "category,message_body",
-    (("accepted", "message 3"), ("reply", "message 2"), ("sended", "message 1")),
-)
-async def test_get_messages(
-    category: str, message_body: str, async_client_with_mocked_auth: AsyncClient
-):
-    response: Response = await async_client_with_mocked_auth.get(f"/api/message/{category}")
-    assert response.json()[0].get("body") == message_body

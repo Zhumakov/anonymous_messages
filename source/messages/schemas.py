@@ -7,7 +7,7 @@ class SSendedMessageView(BaseModel):
     """Displaying sent messages"""
 
     id: int
-    to_user_uid: str
+    to_user: str
     body: str
 
 
@@ -22,7 +22,7 @@ class SReplyMessageView(BaseModel):
     """Displaying reply messages"""
 
     id: int
-    from_user_uid: str
+    from_user: str
     body: str
 
 

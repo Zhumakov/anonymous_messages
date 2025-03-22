@@ -42,7 +42,9 @@ async def send_message_to_user(
     name="reply_on_message",
 )
 async def reply_on_message(
-    message_id: int, message_data: SReplyToMessageRequest, user: User = Depends(get_current_user)
+    message_id: int,
+    message_data: SReplyToMessageRequest,
+    user: User = Depends(get_current_user),
 ):
     primary_message = await verify_and_get_message(
         user_uid=str(user.user_uid), reply_to_message=message_id
@@ -64,7 +66,12 @@ async def reply_on_message(
 )
 async def get_sended_messages(user: User = Depends(get_current_user)):
     messages = await get_messsages_on_category("sended", str(user.user_uid))
-    return messages
+    return (
+        SSendedMessageView(
+            id=message.id, to_user=message.to_user.username, body=message.body
+        )
+        for message in messages
+    )
 
 
 @router.get(
@@ -86,4 +93,9 @@ async def get_accepted_messages(user: User = Depends(get_current_user)):
 )
 async def get_reply_messages(user: User = Depends(get_current_user)):
     messages = await get_messsages_on_category("reply", str(user.user_uid))
-    return messages
+    return (
+        SReplyMessageView(
+            id=message.id, from_user=message.from_user.username, body=message.body
+        )
+        for message in messages
+    )

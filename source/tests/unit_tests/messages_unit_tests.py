@@ -16,13 +16,14 @@ class TestsService:
 
     @staticmethod
     @pytest.mark.parametrize(
-        "user_uid,plain_result",
-        (("1", "message 2"), ("2", "")),
+        "user_uid,plain_result,from_user",
+        (("1", "message 2", "messagetest"), ("2", "", "")),
     )
-    async def test_get_replyes(user_uid: str, plain_result: str):
+    async def test_get_replyes(user_uid: str, plain_result: str, from_user: str):
         result = await MessagesService.get_replyes(user_uid)
         if plain_result:
             assert result[0].body == plain_result
+            assert result[0].from_user.username == from_user
         else:
             assert not result
 
@@ -35,6 +36,19 @@ class TestsService:
         result = await MessagesService.get_accepted(user_uid)
         if plain_result:
             assert result[0].body == plain_result
+        else:
+            assert not result
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "user_uid,plain_result,to_user",
+        (("1", "message 1", "messagetest"), ("9999", "", "")),
+    )
+    async def test_get_sended(user_uid: str, plain_result: str, to_user: str):
+        result = await MessagesService.get_sended(user_uid)
+        if plain_result:
+            assert result[0].body == plain_result
+            assert result[0].to_user.username == to_user
         else:
             assert not result
 

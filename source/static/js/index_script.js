@@ -58,7 +58,6 @@ function loadMessages(tab) {
       displayMessages(messages);
     })
     .catch((error) => {
-      console.error("Ошибка при загрузке сообщений:", error);
       messageContainer.innerHTML =
         '<div class="error">Ошибка при загрузке сообщений.</div>';
     });
@@ -73,21 +72,80 @@ function displayMessages(messages) {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message");
 
+      const senderInfo = message.to_user
+        ? `Сообщение для ${message.to_user}`
+        : message.from_user
+          ? `Сообщение от ${message.from_user}`
+          : "Неизвестный отправитель";
+
+      const fullMessageBody = message.body || "Нет текста сообщения";
+      const truncatedMessageBody =
+        fullMessageBody.length > 100
+          ? fullMessageBody.substring(0, 100) + "..."
+          : fullMessageBody;
+
       messageElement.innerHTML = `
           <div class="message-header">
-            <span class="sender">Неизвестный отправитель</span>
-            <span class="date">${message.date || "Неизвестная дата"}</span>
+            <div>${senderInfo}</div>
+            <div>${message.date || "Неизвестная дата"}</div>
           </div>
           <div class="message-body">
-            ${message.body || "Нет текста сообщения"}
+            ${truncatedMessageBody}
           </div>
         `;
+
+      messageElement.addEventListener("click", () => {
+        openFullMessage(
+          fullMessageBody,
+          senderInfo,
+          message.date || "Неизвестная дата",
+        );
+      });
 
       messageContainer.appendChild(messageElement);
     });
   } else {
     messageContainer.innerHTML = '<div class="empty">Нет сообщений.</div>';
   }
+}
+
+async function openFullMessage(fullMessage, sender, date) {
+  const modal = document.createElement("div");
+  modal.classList.add("modal");
+
+  const modalContent = document.createElement("div");
+  modalContent.classList.add("modal-content");
+
+  const modalHeader = document.createElement("div");
+  modalHeader.classList.add("modal-header");
+  modalHeader.innerHTML = `
+    <div>${sender}</div>
+    <div>${date}</div>
+  `;
+  modalContent.appendChild(modalHeader);
+
+  const modalBody = document.createElement("div");
+  modalBody.classList.add("modal-body");
+  modalBody.textContent = fullMessage;
+  modalContent.appendChild(modalBody);
+
+  const closeButton = document.createElement("span");
+  closeButton.classList.add("close");
+  closeButton.innerHTML = "&times;";
+  closeButton.addEventListener("click", () => {
+    modal.remove();
+  });
+  modalContent.appendChild(closeButton);
+
+  modal.appendChild(modalContent);
+  modal.style.display = "block";
+
+  modal.modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      modal.remove();
+    }
+  });
+  document.body.appendChild(modal);
 }
 
 async function sendMessage() {

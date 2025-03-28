@@ -153,6 +153,7 @@ main {
 
 .modal-body {
   padding: 20px 16px;
+  white-space: pre-wrap;
 }
 
 .modal-body label {

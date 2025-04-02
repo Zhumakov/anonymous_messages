@@ -6,8 +6,7 @@ stages:
 build-job:
   stage: build
   script:
-    - "docker build  . -t anonym-messages"
-
+    - "docker compose -f ci_cd/deploy/docker-compose.yaml build"
 
 test-job:
   stage: test
@@ -18,13 +17,14 @@ test-job:
   script: |
     docker-compose -f ci_cd/tests/docker-compose.yaml up \
     --exit-code-from app \
-    --remove-orphans \
     --abort-on-container-exit
+  after_script:
+    - "docker compose -f ci_cd/test/docker-compose.yaml down"
+    
   artifacts:
     paths:
       - coverage/coverage.json
     expire_in: 1 week
-
 
 check-coverage-job:
   stage: test
@@ -39,7 +39,6 @@ check-coverage-job:
           --fail-under=80 \
           --data-file=coverage/coverage.json
   allow_failure: true
-
 
 deploy-job:
   stage: deploy

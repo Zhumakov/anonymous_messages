@@ -52,10 +52,10 @@ function loadMessages(tab) {
             throw new Error("Server error");
         }
       }
-      return response.json();
+      return response.json(), tab;
     })
     .then((messages) => {
-      displayMessages(messages);
+      displayMessages(messages, tab);
     })
     .catch((error) => {
       messageContainer.innerHTML =
@@ -63,7 +63,7 @@ function loadMessages(tab) {
     });
 }
 
-function displayMessages(messages) {
+function displayMessages(messages, category) {
   const messageContainer = document.getElementById("message-container");
   messageContainer.innerHTML = "";
 
@@ -97,8 +97,9 @@ function displayMessages(messages) {
       messageElement.addEventListener("click", () => {
         openFullMessage(
           fullMessageBody,
-          senderInfo,
+          message.id,
           message.date || "Неизвестная дата",
+          category,
         );
       });
 
@@ -109,7 +110,7 @@ function displayMessages(messages) {
   }
 }
 
-async function openFullMessage(fullMessage, sender, date) {
+async function openFullMessage(fullMessage, sender, date, category) {
   const modal = document.createElement("div");
   modal.classList.add("modal");
 
@@ -118,16 +119,6 @@ async function openFullMessage(fullMessage, sender, date) {
 
   const modalHeader = document.createElement("div");
   modalHeader.classList.add("modal-header");
-  modalHeader.innerHTML = `
-    <div>${sender}</div>
-    <div>${date}</div>
-  `;
-  modalContent.appendChild(modalHeader);
-
-  const modalBody = document.createElement("div");
-  modalBody.classList.add("modal-body");
-  modalBody.textContent = fullMessage;
-  modalContent.appendChild(modalBody);
 
   const closeButton = document.createElement("span");
   closeButton.classList.add("close");
@@ -135,7 +126,37 @@ async function openFullMessage(fullMessage, sender, date) {
   closeButton.addEventListener("click", () => {
     modal.remove();
   });
-  modalContent.appendChild(closeButton);
+
+  const sender = document.createElement("div");
+  sender.innerHTML = "${sender}";
+
+  const date = document.createElement("div");
+  date.innerHTML = "${date}";
+
+  modalHeader.appendChild(closeButton);
+  modalHeader.appendChild(sender);
+  modalHeader.appendChild(date);
+  modalContent.appendChild(modalHeader);
+
+  const modalBody = document.createElement("div");
+  modalBody.classList.add("modal-body");
+  modalBody.textContent = fullMessage;
+  modalContent.appendChild(modalBody);
+
+  if (category == "accepted") {
+    const replyButton = document.createElement("button");
+    replyButton.classList.add("open-modal-button");
+    replyButton.onclick = function() {
+      var modalSendMessage = document.getElementById("modal");
+      var uidInput = document.getlementById("uid");
+      uidInput.value = sender;
+      modalSendMessage.style.display = "block";
+    };
+
+    const modalFooter = document.createElement("div");
+    modalFooter.appendChild(replyButton);
+    modal.appendChild(modalFooter);
+  }
 
   modal.appendChild(modalContent);
   modal.style.display = "block";
@@ -148,12 +169,14 @@ async function openFullMessage(fullMessage, sender, date) {
   document.body.appendChild(modal);
 }
 
-async function sendMessage() {
+async function sendMessage(message_id = null) {
   var uid = document.getElementById("uid").value;
   var message = document.getElementById("message").value;
   var modal = document.getElementById("modal");
 
-  fetch("/api/message", {
+  const url = message_id ? "/api/message/${message_id}" : "/api/message";
+
+  fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

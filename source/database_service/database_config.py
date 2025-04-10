@@ -12,25 +12,21 @@ from source.settings import settings
 
 
 if settings.MODE == "TEST":
-    DATABASE_URL = (
-        f"postgresql+asyncpg://"
-        f"{settings.TEST_DB_USER}:{settings.TEST_DB_PASS}"
-        f"@{settings.TEST_DB_HOST}:{settings.TEST_DB_PORT}/{settings.TEST_DB_NAME}"
-    )
     DATABASE_PARAMS = {"poolclass": NullPool}
-
 else:
-    DATABASE_URL = (
-        f"postgresql+asyncpg://"
-        f"{settings.DB_USER}:{settings.DB_PASS}"
-        f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
-    )
     DATABASE_PARAMS = {}
 
+DATABASE_URL = (
+    f"postgresql+asyncpg://"
+    f"{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
+    f"@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
+)
 os.environ["SQLALCHEMY_URL"] = DATABASE_URL
 
 async_engine = create_async_engine(url=DATABASE_URL, **DATABASE_PARAMS, future=True)
-session_maker = async_sessionmaker(bind=async_engine, expire_on_commit=False, class_=AsyncSession)
+session_maker = async_sessionmaker(
+    bind=async_engine, expire_on_commit=False, class_=AsyncSession
+)
 
 
 class Base(DeclarativeBase):

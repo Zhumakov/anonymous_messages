@@ -3,11 +3,9 @@ services:
   app:
     build: ../../
     image: anonym-messages
-    environment:
-      ENV_PATH: ci_cd/tests/.env
     command: ci_cd/tests/command.sh
     env_file:
-      - .env
+      - ../../.env
     volumes:
       - coverage:/coverage
     depends_on:
@@ -17,13 +15,9 @@ services:
   db:
     image: postgres:16
     env_file:
-      - .env
-    environment:
-      POSTGRES_USER: ${TEST_DB_USER}
-      POSTGRES_PASSWORD: ${TEST_DB_PASS}
-      POSTGRES_DB: ${TEST_DB_NAME}
+      - ../../.env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${TEST_DB_USER} -d ${TEST_DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 2s
       retries: 5

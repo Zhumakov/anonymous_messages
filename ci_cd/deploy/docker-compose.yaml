@@ -1,29 +1,22 @@
 services:
   db:
     image: postgres:16
-    volumes:
-      - db_data:/var/lib/postgresql/data
     env_file:
       - .env
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
-
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 5s 
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
       timeout: 2s
       retries: 5
     restart: unless-stopped
     networks:
       - main_network
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   app:
     build: ../../
     image: anonym-messages
-    environment:
-      ENV_PATH: ci_cd/deploy/.env
     command: ci_cd/deploy/command.sh
     env_file:
       - .env
@@ -32,7 +25,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped 
+    restart: unless-stopped
     networks:
       - main_network
 

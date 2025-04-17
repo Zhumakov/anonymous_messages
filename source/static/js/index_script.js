@@ -30,37 +30,28 @@ async function GetAuthorizedUser() {
   }
 }
 
-function loadMessages(tab) {
+async function loadMessages(tab) {
   const messageContainer = document.getElementById("message-container");
-  let apiUrl = `/api/message/${tab}`;
+  const url = `/api/message/${tab}`;
 
   messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
 
-  fetch(apiUrl)
-    .then((response) => {
-      if (!response.ok) {
-        switch (response.status) {
-          case 401:
-            const success = attemptAuthorization();
-            if (success) {
-              return loadMessages(tab);
-            } else {
-              window.location.href = "/login";
-            }
-            break;
-          default:
-            throw new Error("Server error");
-        }
-      }
-      return response.json(), tab;
-    })
-    .then((messages) => {
-      displayMessages(messages, tab);
-    })
-    .catch((error) => {
-      messageContainer.innerHTML =
-        '<div class="error">Ошибка при загрузке сообщений.</div>';
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
+    if (!response.ok) {
+      throw new Error();
+    }
+    const messages = await response.json();
+    return messages;
+  } catch (error) {
+    messageContainer.innerHTML =
+      '<div class="error">Ошибка при загрузке сообщений.</div>';
+  }
 }
 
 function displayMessages(messages, category) {
@@ -87,7 +78,7 @@ function displayMessages(messages, category) {
       messageElement.innerHTML = `
           <div class="message-header">
             <div>${senderInfo}</div>
-            <div>${message.date || "Неизвестная дата"}</div>
+            <div class="message-date">${message.date || "Неизвестная дата"}</div>
           </div>
           <div class="message-body">
             ${truncatedMessageBody}
@@ -98,6 +89,7 @@ function displayMessages(messages, category) {
         openFullMessage(
           fullMessageBody,
           message.id,
+          senderInfo,
           message.date || "Неизвестная дата",
           category,
         );
@@ -110,7 +102,7 @@ function displayMessages(messages, category) {
   }
 }
 
-async function openFullMessage(fullMessage, sender, date, category) {
+async function openFullMessage(fullMessage, messageId, sender, date, category) {
   const modal = document.createElement("div");
   modal.classList.add("modal");
 
@@ -127,15 +119,15 @@ async function openFullMessage(fullMessage, sender, date, category) {
     modal.remove();
   });
 
-  const sender = document.createElement("div");
-  sender.innerHTML = "${sender}";
+  const sender_div = document.createElement("div");
+  sender_div.innerHTML = `${sender}`;
 
-  const date = document.createElement("div");
-  date.innerHTML = "${date}";
+  const date_div = document.createElement("div");
+  date_div.innerHTML = `${date}`;
 
   modalHeader.appendChild(closeButton);
-  modalHeader.appendChild(sender);
-  modalHeader.appendChild(date);
+  modalHeader.appendChild(sender_div);
+  modalHeader.appendChild(date_div);
   modalContent.appendChild(modalHeader);
 
   const modalBody = document.createElement("div");
@@ -143,38 +135,51 @@ async function openFullMessage(fullMessage, sender, date, category) {
   modalBody.textContent = fullMessage;
   modalContent.appendChild(modalBody);
 
+  var sendButton = document.getElementById("send-button");
   if (category == "accepted") {
     const replyButton = document.createElement("button");
     replyButton.classList.add("open-modal-button");
-    replyButton.onclick = function() {
+    replyButton.textContent = "Ответить";
+    replyButton.onclick = function () {
       var modalSendMessage = document.getElementById("modal");
-      var uidInput = document.getlementById("uid");
-      uidInput.value = sender;
+      var uidInput = document.getElementById("uid");
+      var uidLabel = document.getElementById("uid-label");
+      uidInput.style.display = "none";
+      uidLabel.style.display = "none";
       modalSendMessage.style.display = "block";
+
+      sendButton.onclick = () => {
+        sendMessage(messageId);
+        uidInput.style.display = "block";
+        uidLabel.style.display = "block";
+      };
     };
 
     const modalFooter = document.createElement("div");
     modalFooter.appendChild(replyButton);
-    modal.appendChild(modalFooter);
+    modalContent.appendChild(modalFooter);
   }
 
   modal.appendChild(modalContent);
   modal.style.display = "block";
 
-  modal.modal.addEventListener("click", (event) => {
+  modal.addEventListener("click", (event) => {
     if (event.target === modal) {
       modal.remove();
+      sendButton.onclick = () => {
+        sendMessage();
+      };
     }
   });
   document.body.appendChild(modal);
 }
 
-async function sendMessage(message_id = null) {
+async function sendMessage(messageId = null) {
   var uid = document.getElementById("uid").value;
   var message = document.getElementById("message").value;
   var modal = document.getElementById("modal");
 
-  const url = message_id ? "/api/message/${message_id}" : "/api/message";
+  const url = messageId ? `/api/message/accepted/${messageId}` : "/api/message";
 
   fetch(url, {
     method: "POST",
@@ -228,12 +233,12 @@ async function displayNotification(message, type = "info") {
   container.appendChild(notificationElement);
   notificationElement.style.display = "block";
 
-  setTimeout(function() {
+  setTimeout(function () {
     notificationElement.remove();
   }, 3000);
 }
 
-document.addEventListener("DOMContentLoaded", async function() {
+document.addEventListener("DOMContentLoaded", async function () {
   const tabButtons = document.querySelectorAll(".tab-button");
 
   const username = document.getElementById("username");
@@ -253,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
   const logoutButton = document.getElementsByClassName("logout-button")[0];
   if (logoutButton) {
-    logoutButton.addEventListener("click", function() {
+    logoutButton.addEventListener("click", function () {
       fetch("/api/users/auth", {
         method: "DELETE",
       })
@@ -269,13 +274,14 @@ document.addEventListener("DOMContentLoaded", async function() {
   }
 
   tabButtons.forEach((button) => {
-    button.addEventListener("click", function() {
+    button.addEventListener("click", async function () {
       const tab = this.dataset.tab;
 
       tabButtons.forEach((btn) => btn.classList.remove("active"));
       this.classList.add("active");
 
-      loadMessages(tab);
+      const messages = await loadMessages(tab);
+      displayMessages(messages, tab);
     });
   });
 
@@ -284,22 +290,21 @@ document.addEventListener("DOMContentLoaded", async function() {
   var closeSpan = document.getElementsByClassName("close")[0];
   var sendButton = document.getElementById("send-button");
 
-  btn.onclick = function() {
+  btn.onclick = function () {
     modal.style.display = "block";
   };
 
-  closeSpan.onclick = function() {
+  closeSpan.onclick = function () {
     modal.style.display = "none";
   };
 
-  window.onclick = function(event) {
+  window.onclick = function (event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
   };
 
-  sendButton.onclick = sendMessage;
-
-  loadMessages("accepted");
-  tabButtons[0].classList.add("active");
+  sendButton.onclick = () => {
+    sendMessage();
+  };
 });

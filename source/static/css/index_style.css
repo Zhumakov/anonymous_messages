@@ -56,7 +56,7 @@ main {
 .profile-avatar img {
   width: 100%;
   height: auto;
-  display: block; /* Убирает нижний отступ у img элемента */
+  display: block;
 }
 
 .profile-info h2 {
@@ -115,7 +115,13 @@ main {
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 5px;
-  word-break: break-word; /* Предотвращает переполнение длинными словами */
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.message-date {
+  margin: 5px 0;
+  font-size: small;
 }
 
 /* MODEL WINDOW */
@@ -146,6 +152,7 @@ main {
   padding: 2px 16px;
   background-color: var(--header-footer-color);
   color: var(--text-color);
+  align-items: center;
   border-bottom: 1px solid var(--border-color);
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from sqlalchemy.exc import IntegrityError
 
@@ -13,6 +15,7 @@ from source.auth.schemas import (
 from source.auth.service import UsersService
 
 router = APIRouter(prefix="/users", tags=["Authenticate and Users"])
+logger = logging.getLogger("auth_logger")
 
 
 @router.post(
@@ -49,6 +52,7 @@ async def switch_password_current_user(
             passwords.current_password, passwords.new_password, str(user.email)
         )
     except IntegrityError:
+        logger.error("HttpException: password to change failed", extra={"user_id": user.id, "user_email": user.email})
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Password to change failed"
         )

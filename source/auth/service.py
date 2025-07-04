@@ -1,8 +1,12 @@
+import logging
+
 from source.auth.models import User
 from source.auth.schemas import SUserFilterQuery, SUserInsertQuery, SUserUpdateQuery
 from source.auth.utils import hash_password, verify_password
 from source.database_service.Base import BaseService
 from source.exceptions.auth_exc import exceptions
+
+logger = logging.getLogger("auth_logger")
 
 
 class UsersService(
@@ -18,10 +22,12 @@ class UsersService(
     async def authenticate_user(cls, email: str, password: str) -> User:
         user = await cls.get_one_or_none(email=email)
         if not user:
+            logger.debug("AuthFailed: user is not exist")
             raise exceptions.AuthFailed
 
         password_is_valid = verify_password(password, str(user.hashed_password))
         if not password_is_valid:
+            logger.info("AuthFailed: passsword is invalid")
             raise exceptions.AuthFailed
 
         return user
@@ -29,6 +35,7 @@ class UsersService(
     @classmethod
     async def set_refresh_token_id(cls, token_id: str, user_id: int):
         if not await cls.get_by_id(user_id):
+            logger.debug("RefreshTokenCreateFailed: User is not exist")
             raise exceptions.RefreshTokenCreateFailed
 
         filter_by = {"id": user_id}

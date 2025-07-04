@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Response
 from jose import JWTError, jwt
@@ -55,7 +55,7 @@ async def register_user(user_data: SUserRegistration):
 
 
 async def create_refresh_token(user_id: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(days=30)
+    expire = datetime.now(UTC) + timedelta(days=30)
 
     token_id = str(uuid.uuid4())
     try:
@@ -73,7 +73,7 @@ async def create_refresh_token(user_id: str) -> str:
 
 
 async def create_session_token(user_id: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    expire = datetime.now(UTC) + timedelta(minutes=15)
     to_encode = {"sub": user_id, "exp": expire}
     return jwt_encode(to_encode)
 

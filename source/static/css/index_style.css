@@ -78,6 +78,10 @@ main {
   transition: background-color 0.3s ease;
 }
 
+.logout-button:hover {
+  background-color: var(--active-button-color);
+}
+
 /* Message Navigation */
 .message-navigation {
   display: flex;

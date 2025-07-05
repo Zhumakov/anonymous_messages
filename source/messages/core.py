@@ -1,3 +1,4 @@
+import logging
 from typing import Literal, Optional
 
 from sqlalchemy.exc import IntegrityError
@@ -6,6 +7,7 @@ from source.exceptions.messages_exc import exceptions
 from source.messages.models import Message
 from source.messages.service import MessagesService
 
+logger = logging.getLogger("message_logger")
 
 async def verify_and_get_message(user_uid: str, reply_to_message: int) -> Message:
     """
@@ -26,6 +28,7 @@ async def verify_and_get_message(user_uid: str, reply_to_message: int) -> Messag
         or bool(primary_message.reply_to_message)
         or user_uid != primary_message.to_user_uid
     ):
+        logger.debug("UserNotAcceptedThisMessage: user is not receive this message or it`s reply", extra={"user_uid": user_uid, "reply_to_message": reply_to_message})
         raise exceptions.UserNotAcceptedThisMessage
     return primary_message
 
@@ -37,6 +40,7 @@ async def send_message_and_notification(
     reply_to_message: Optional[int] = None,
 ):
     if to_user_uid == from_user_uid:
+        logger.debug("MessageHasNotSended: can't send a message to yourself", extra={"to_user_uid": to_user_uid, "from_user_uid": from_user_uid})
         raise exceptions.MessageHasNotSended
     try:
         await MessagesService.insert_into_table(
@@ -46,6 +50,7 @@ async def send_message_and_notification(
             reply_to_message=reply_to_message,
         )
     except IntegrityError:
+        logger.debug("MessageHasNotSended: database error")
         raise exceptions.MessageHasNotSended
 
 

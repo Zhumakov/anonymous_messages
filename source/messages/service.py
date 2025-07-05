@@ -1,3 +1,4 @@
+import logging
 from typing import Sequence
 
 from sqlalchemy import Select
@@ -11,6 +12,8 @@ from source.messages.schemas import (
     SMessageInsertQuery,
     SMessageUpdateQuery,
 )
+
+logger = logging.getLogger("message_logger")
 
 
 class MessagesService(

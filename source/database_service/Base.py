@@ -1,3 +1,4 @@
+import logging
 from typing import Generic, Sequence, Type, TypeVar
 
 from pydantic import BaseModel, ValidationError
@@ -11,6 +12,9 @@ ModelType = TypeVar("ModelType", bound=Base)
 FilterModelScheme = TypeVar("FilterModelScheme", bound=BaseModel)
 UpdateModelScheme = TypeVar("UpdateModelScheme", bound=BaseModel)
 ModelNodeScheme = TypeVar("ModelNodeScheme", bound=BaseModel)
+
+
+logger = logging.getLogger("base_service_logger")
 
 
 class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateModelScheme]):
@@ -32,8 +36,14 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
 
     @classmethod
     async def get_one_or_none(cls, **filter_by) -> ModelType | None:
-        cls.filter_model_scheme.model_validate(filter_by)
+        try:
+            cls.filter_model_scheme.model_validate(filter_by)
+        except ValidationError as exc:
+            logger.debug("ValidationError: filter fields is not valid", exc_info=exc, extra=filter_by)
+            raise exc
+        
         if not filter_by:
+            logger.debug("ValidationError: filter cnnot be empty")
             raise ValidationError("Input dictionary cannot be empty.", ())
 
         async with cls.async_session_maker() as session:
@@ -44,8 +54,14 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
 
     @classmethod
     async def get_all(cls, **filter_by) -> Sequence[ModelType]:
-        cls.filter_model_scheme.model_validate(filter_by)
+        try:
+            cls.filter_model_scheme.model_validate(filter_by)
+        except ValidationError as exc:
+            logger.debug("ValidationError: filter fields is not valid", exc_info=exc, extra=filter_by)
+            raise exc
+            
         if not filter_by:
+            logger.debug("ValidationError: filter cnnot be empty")
             raise ValidationError("Input dictionary cannot be empty.", ())
 
         async with cls.async_session_maker() as session:
@@ -56,16 +72,21 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
 
     @classmethod
     async def insert_into_table(cls, **kwargs):
-        cls.model_node_scheme.model_validate(kwargs)
+        try:
+            cls.model_node_scheme.model_validate(kwargs)
+        except ValidationError as exc:
+            logger.debug("ValidationError: input fields for insert query is not valid", exc_info=exc, extra=kwargs)
+            raise exc
 
         async with cls.async_session_maker() as session:
             session: AsyncSession
             query = Insert(cls.model).values(**kwargs)
-        try:
-            await session.execute(query)
-            await session.commit()
-        except IntegrityError as exc:
-            raise exc
+            try:
+                await session.execute(query)
+                await session.commit()
+            except IntegrityError as exc:
+                logger.error("IntegrityError: database error", exc_info=exc)
+                raise exc
 
     @classmethod
     async def update_node(cls, filter_by: dict, values: dict):
@@ -81,6 +102,7 @@ class BaseService(Generic[ModelType, FilterModelScheme, ModelNodeScheme, UpdateM
                 await session.execute(query)
                 await session.commit()
             except IntegrityError as exc:
+                logger.error("IntegrityError: database error", exc_info=exc)
                 raise exc
 
     @classmethod

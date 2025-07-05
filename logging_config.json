@@ -40,11 +40,27 @@
         "file_handler"
       ]
     },
+    "message_logger": {
+      "level": "DEBUG",
+      "propagate": false,
+      "handlers": [
+        "console_handler",
+        "file_handler"
+      ]
+    },
     "request_logger": {
       "level": "INFO",
       "propagate": false,
       "handlers": [
         "file_handler"
+      ]
+    },
+    "base_service_logger": {
+      "level": "DEBUG",
+      "propagate": false,
+      "handlers": [
+        "file_handler",
+        "console_handler"
       ]
     }
   }

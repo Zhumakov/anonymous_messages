@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, staticfiles
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from source.auth.router import router as auth_router
 from source.front.router import router as front_router
@@ -28,3 +29,5 @@ app.include_router(router=front_router)
 app.mount("/static", staticfiles.StaticFiles(directory="source/static"), name="static")
 
 app.add_middleware(LoggingMiddleware)
+
+instrumentator = Instrumentator().instrument(app).expose(app)

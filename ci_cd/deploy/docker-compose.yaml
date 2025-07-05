@@ -38,6 +38,22 @@ services:
     networks:
       - main_network
 
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - "./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"
+    networks:
+      - main_network
+    depends_on:
+      - nginx
+
+  node_exporter:
+    image: prom/node-exporter
+    networks:
+      - main_network
+
 networks:
   main_network:
     driver: bridge

@@ -38,12 +38,22 @@ services:
     networks:
       - main_network
 
+  grafana:
+    image: grafana/grafana:latest
+    env_file:
+      - .env
+    volumes:
+      - "grafana_data:/var/lib/grafana"
+      - "./grafana/provisioning:/etc/grafana/provisioning"
+    ports:
+      - "3000:3000"
+    networks:
+      - main_network
+
   prometheus:
     image: prom/prometheus:latest
     volumes:
       - "./prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml"
-    ports:
-      - "9090:9090"
     networks:
       - main_network
     depends_on:
@@ -60,3 +70,4 @@ networks:
 
 volumes:
   db_data:
+  grafana_data:

@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Класс с насройками проекта."""
+    """Класс с настройками проекта."""
 
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
     MODE: Literal["DEV", "TEST", "PROD"]
@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_PORT: int
     POSTGRES_USER: str
+    
+    GF_SECURITY_ADMIN_USER: str
+    GF_SECURITY_ADMIN_PASSWORD: str
 
     ALGORITHM: str
     SECRET_KEY: str

@@ -78,7 +78,7 @@ function displayMessages(messages, category) {
       messageElement.innerHTML = `
           <div class="message-header">
             <div>${senderInfo}</div>
-            <div class="message-date">${message.date || "Неизвестная дата"}</div>
+            <div class="message-date">${message.sended_date || "Неизвестная дата"}</div>
           </div>
           <div class="message-body">
             ${truncatedMessageBody}
@@ -90,7 +90,7 @@ function displayMessages(messages, category) {
           fullMessageBody,
           message.id,
           senderInfo,
-          message.date || "Неизвестная дата",
+          message.sended_date || "Неизвестная дата",
           category,
         );
       });
@@ -140,7 +140,7 @@ async function openFullMessage(fullMessage, messageId, sender, date, category) {
     const replyButton = document.createElement("button");
     replyButton.classList.add("open-modal-button");
     replyButton.textContent = "Ответить";
-    replyButton.onclick = function () {
+    replyButton.onclick = function() {
       var modalSendMessage = document.getElementById("modal");
       var uidInput = document.getElementById("uid");
       var uidLabel = document.getElementById("uid-label");
@@ -233,12 +233,12 @@ async function displayNotification(message, type = "info") {
   container.appendChild(notificationElement);
   notificationElement.style.display = "block";
 
-  setTimeout(function () {
+  setTimeout(function() {
     notificationElement.remove();
   }, 3000);
 }
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", async function() {
   const tabButtons = document.querySelectorAll(".tab-button");
 
   const username = document.getElementById("username");
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const logoutButton = document.getElementsByClassName("logout-button")[0];
   if (logoutButton) {
-    logoutButton.addEventListener("click", function () {
+    logoutButton.addEventListener("click", function() {
       fetch("/api/users/auth", {
         method: "DELETE",
       })
@@ -274,7 +274,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   tabButtons.forEach((button) => {
-    button.addEventListener("click", async function () {
+    button.addEventListener("click", async function() {
       const tab = this.dataset.tab;
 
       tabButtons.forEach((btn) => btn.classList.remove("active"));
@@ -290,15 +290,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   var closeSpan = document.getElementsByClassName("close")[0];
   var sendButton = document.getElementById("send-button");
 
-  btn.onclick = function () {
+  btn.onclick = function() {
     modal.style.display = "block";
   };
 
-  closeSpan.onclick = function () {
+  closeSpan.onclick = function() {
     modal.style.display = "none";
   };
 
-  window.onclick = function (event) {
+  window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }

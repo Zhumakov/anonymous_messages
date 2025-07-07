@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_PORT: int
     POSTGRES_USER: str
-    
+
     GF_SECURITY_ADMIN_USER: str
     GF_SECURITY_ADMIN_PASSWORD: str
 

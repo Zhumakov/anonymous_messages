@@ -1,25 +1,29 @@
 import pytest
 from httpx import AsyncClient, Response
 
+from source.tests.conftest import FIXED_STR_DATETIME
+
 
 @pytest.mark.parametrize(
-    "category,message_body,username",
+    "category,message_body,username,str_sended_date",
     (
-        ("accepted", "message 3", ""),
-        ("reply", "message 2", "messagetest"),
-        ("sended", "message 1", "messagetest"),
+        ("accepted", "message 3", "", FIXED_STR_DATETIME),
+        ("reply", "message 2", "messagetest", FIXED_STR_DATETIME),
+        ("sended", "message 1", "messagetest", FIXED_STR_DATETIME),
     ),
 )
 async def test_get_messages(
     category: str,
     message_body: str,
     username: str,
+    str_sended_date: str,
     async_client_with_mocked_auth: AsyncClient,
 ):
     response: Response = await async_client_with_mocked_auth.get(
         f"/api/message/{category}"
     )
     assert response.json()[0].get("body") == message_body
+    assert response.json()[0].get("sended_date") == str_sended_date
 
     if category == "reply":
         assert response.json()[0].get("from_user") == username

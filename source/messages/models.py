@@ -1,5 +1,5 @@
 from pydantic import ConfigDict
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Relationship
 
 from source.database_service.database_config import Base
@@ -13,6 +13,7 @@ class Message(Base):
     to_user_uid = Column(String, ForeignKey("users.user_uid"))
     reply_to_message = Column(Integer, nullable=True)
     body = Column(String, nullable=False)
+    sended_date = Column(DateTime(timezone=True), nullable=False)
 
     from_user = Relationship(
         "User", foreign_keys="[Message.from_user_uid]", back_populates="sent_messages"

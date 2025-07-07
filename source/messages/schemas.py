@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ class SSendedMessageView(BaseModel):
     id: int
     to_user: str
     body: str
+    sended_date: str
 
 
 class SAcceptedMessageView(BaseModel):
@@ -16,6 +18,7 @@ class SAcceptedMessageView(BaseModel):
 
     id: int
     body: str
+    sended_date: str
 
 
 class SReplyMessageView(BaseModel):
@@ -24,6 +27,7 @@ class SReplyMessageView(BaseModel):
     id: int
     from_user: str
     body: str
+    sended_date: str
 
 
 class SSendMessageRequest(BaseModel):
@@ -64,5 +68,6 @@ class SMessageInsertQuery(BaseModel):
     to_user_uid: str
     reply_to_message: Optional[int] = None
     body: str
+    sended_date: datetime
 
     model_config = {"strict": True, "extra": "forbid"}

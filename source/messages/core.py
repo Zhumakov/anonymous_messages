@@ -1,4 +1,5 @@
 import logging
+from datetime import UTC, datetime
 from typing import Literal, Optional
 
 from sqlalchemy.exc import IntegrityError
@@ -33,7 +34,7 @@ async def verify_and_get_message(user_uid: str, reply_to_message: int) -> Messag
     return primary_message
 
 
-async def send_message_and_notification(
+async def send_message(
     to_user_uid: str,
     from_user_uid: str,
     body: str,
@@ -48,9 +49,10 @@ async def send_message_and_notification(
             from_user_uid=from_user_uid,
             body=body,
             reply_to_message=reply_to_message,
+            sended_date = datetime.now(UTC)
         )
     except IntegrityError:
-        logger.debug("MessageHasNotSended: database error")
+        logger.debug("MessageHasNotSended: database error", extra={"to_user_uid": to_user_uid, "from_user_uid": from_user_uid})
         raise exceptions.MessageHasNotSended
 
 

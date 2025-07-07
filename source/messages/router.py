@@ -4,7 +4,7 @@ from source.auth.dependenties import get_current_user
 from source.auth.models import User
 from source.messages.core import (
     get_messsages_on_category,
-    send_message_and_notification,
+    send_message,
     verify_and_get_message,
 )
 from source.messages.schemas import (
@@ -14,6 +14,8 @@ from source.messages.schemas import (
     SSendedMessageView,
     SSendMessageRequest,
 )
+
+DATETIME_FORMAT = "%d.%m.%Y %H:%M"
 
 router = APIRouter(prefix="/message", tags=["Messages"])
 
@@ -27,7 +29,7 @@ router = APIRouter(prefix="/message", tags=["Messages"])
 async def send_message_to_user(
     message_data: SSendMessageRequest, user: User = Depends(get_current_user)
 ):
-    await send_message_and_notification(
+    await send_message(
         to_user_uid=message_data.to_user_uid,
         from_user_uid=str(user.user_uid),
         body=message_data.body,
@@ -49,7 +51,7 @@ async def reply_on_message(
     primary_message = await verify_and_get_message(
         user_uid=str(user.user_uid), reply_to_message=message_id
     )
-    await send_message_and_notification(
+    await send_message(
         to_user_uid=str(primary_message.from_user_uid),
         from_user_uid=str(user.user_uid),
         body=message_data.body,
@@ -68,7 +70,10 @@ async def get_sended_messages(user: User = Depends(get_current_user)):
     messages = await get_messsages_on_category("sended", str(user.user_uid))
     return (
         SSendedMessageView(
-            id=message.id, to_user=message.to_user.username, body=message.body
+            id=message.id,
+            to_user=message.to_user.username,
+            body=message.body,
+            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
         )
         for message in messages
     )
@@ -82,7 +87,14 @@ async def get_sended_messages(user: User = Depends(get_current_user)):
 )
 async def get_accepted_messages(user: User = Depends(get_current_user)):
     messages = await get_messsages_on_category("accepted", str(user.user_uid))
-    return messages
+    return (
+        SAcceptedMessageView(
+            id=message.id,
+            body=message.body,
+            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
+        )
+        for message in messages
+    )
 
 
 @router.get(
@@ -95,7 +107,10 @@ async def get_reply_messages(user: User = Depends(get_current_user)):
     messages = await get_messsages_on_category("reply", str(user.user_uid))
     return (
         SReplyMessageView(
-            id=message.id, from_user=message.from_user.username, body=message.body
+            id=message.id,
+            from_user=message.from_user.username,
+            body=message.body,
+            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
         )
         for message in messages
     )

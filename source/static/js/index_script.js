@@ -37,10 +37,12 @@ async function loadMessages(tab) {
   messageContainer.innerHTML = '<div class="loading">Загрузка...</div>';
 
   try {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Timezone": timezone,
       },
     });
     if (!response.ok) {

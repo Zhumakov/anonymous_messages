@@ -1,14 +1,6 @@
 from fastapi import HTTPException, status
 
 
-class MessagesException(Exception):
-    def __init__(self, detail: str, *args: object) -> None:
-        super().__init__(*args)
-        self.detail = detail
-
-    def __str__(self) -> str:
-        return f"{self.__class__.__name__}({self.detail})"
-
 
 UserNotAcceptedThisMessage = HTTPException(
     status_code=status.HTTP_403_FORBIDDEN,
@@ -17,4 +9,9 @@ UserNotAcceptedThisMessage = HTTPException(
 
 MessageHasNotSended = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST, detail="Fail to send a message"
+)
+
+
+IncorrectTimeZone = HTTPException(
+    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Incorrect timezone"
 )

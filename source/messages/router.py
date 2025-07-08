@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, status
+from typing import Optional
+from zoneinfo import ZoneInfo
+from fastapi import APIRouter, Depends, Header, status
 
 from source.auth.dependenties import get_current_user
 from source.auth.models import User
+from source.exceptions.messages_exc.exceptions import IncorrectTimeZone
 from source.messages.core import (
     get_messsages_on_category,
     send_message,
@@ -14,6 +17,7 @@ from source.messages.schemas import (
     SSendedMessageView,
     SSendMessageRequest,
 )
+from source.messages.utils import is_valid_timezone
 
 DATETIME_FORMAT = "%d.%m.%Y %H:%M"
 
@@ -66,14 +70,17 @@ async def reply_on_message(
     response_model=list[SSendedMessageView],
     name="get_sended_messages",
 )
-async def get_sended_messages(user: User = Depends(get_current_user)):
+async def get_sended_messages(user: User = Depends(get_current_user), timezone: str = Header("Europe/Moscow")):
+    if not is_valid_timezone(timezone):
+        raise IncorrectTimeZone
+        
     messages = await get_messsages_on_category("sended", str(user.user_uid))
     return (
         SSendedMessageView(
             id=message.id,
             to_user=message.to_user.username,
             body=message.body,
-            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
+            sended_date=message.sended_date.astimezone(ZoneInfo(timezone)).strftime(DATETIME_FORMAT),
         )
         for message in messages
     )
@@ -85,13 +92,16 @@ async def get_sended_messages(user: User = Depends(get_current_user)):
     response_model=list[SAcceptedMessageView],
     name="get_accepted_messages",
 )
-async def get_accepted_messages(user: User = Depends(get_current_user)):
+async def get_accepted_messages(user: User = Depends(get_current_user), timezone: str = Header("Europe/Moscow")):
+    if not is_valid_timezone(timezone):
+        raise IncorrectTimeZone
+        
     messages = await get_messsages_on_category("accepted", str(user.user_uid))
     return (
         SAcceptedMessageView(
             id=message.id,
             body=message.body,
-            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
+            sended_date=message.sended_date.astimezone(ZoneInfo(timezone)).strftime(DATETIME_FORMAT),
         )
         for message in messages
     )
@@ -103,14 +113,17 @@ async def get_accepted_messages(user: User = Depends(get_current_user)):
     response_model=list[SReplyMessageView],
     name="get_reply_messages",
 )
-async def get_reply_messages(user: User = Depends(get_current_user)):
+async def get_reply_messages(user: User = Depends(get_current_user), timezone: str = Header("Europe/Moscow")):
+    if not is_valid_timezone(timezone):
+        raise IncorrectTimeZone
+        
     messages = await get_messsages_on_category("reply", str(user.user_uid))
     return (
         SReplyMessageView(
             id=message.id,
             from_user=message.from_user.username,
             body=message.body,
-            sended_date=message.sended_date.strftime(DATETIME_FORMAT),
+            sended_date=message.sended_date.astimezone(ZoneInfo(timezone)).strftime(DATETIME_FORMAT),
         )
         for message in messages
     )

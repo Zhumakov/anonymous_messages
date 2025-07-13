@@ -1,5 +1,5 @@
 # Virtual environment and git repository files
-venv/
+.venv/
 .git
 .vimspector.json
 .coverage
@@ -8,6 +8,7 @@ htmlcov/
 # Python cache files
 __pycache__/
 .pytest_cache/
+.ruff_cache/
 
 # .env files
 *.env

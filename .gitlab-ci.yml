@@ -1,3 +1,6 @@
+variables:
+    DOCKER_HOST: unix:///var/run/docker.sock
+
 stages:
   - build
   - test
